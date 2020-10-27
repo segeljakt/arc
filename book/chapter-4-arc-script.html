@@ -1,0 +1,928 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js rust">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>arc-script - Arc's Front-End - Arc</title>
+        
+        
+
+
+        <!-- Custom HTML head -->
+        
+
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="Arc documentation.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        
+        <link rel="icon" href="favicon.svg">
+        
+        
+        <link rel="shortcut icon" href="favicon.png">
+        
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        
+        <link rel="stylesheet" href="css/print.css" media="print">
+        
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        
+        <link rel="stylesheet" href="fonts/fonts.css">
+        
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "rust";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('rust')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="chapter-1-introduction.html">Introduction - What is Arc?</a></li><li class="chapter-item expanded "><a href="chapter-2-installation.html">Installation</a></li><li class="chapter-item expanded "><a href="chapter-3-tutorial.html">Tutorial</a></li><li class="chapter-item expanded "><a href="chapter-4-arc-script.html" class="active">arc-script - Arc's Front-End</a></li><li class="chapter-item expanded "><a href="chapter-5-arc-mlir.html">arc-mlir - Arc's Middle-End</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                        
+                    </div>
+
+                    <h1 class="menu-title">Arc</h1>
+
+                    <div class="right-buttons">
+                        
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        
+                        
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <p>Following are some rough incomplete ideas for <code>arc-script</code>s abstract syntax:</p>
+<pre><code>S ::= F* E                         # Script
+F ::= fn ID (self: T, ...): T = E  # Method
+E ::= ID                           # Variable
+    | E + E | E * E | ...          # Scalar Binary Ops
+    | !E | -E | E as T             # Scalar Unary Ops
+    | Int | Float | String         # Scalar Constants
+    | Key | Timestamp              # Stream constants
+    | [E, ...]                     # Array Constant
+    | E.E                          # Array Indexing
+    | if E then E else E           # Conditional
+    | ID = E; E                    # Assignment
+    | E.ID(E, ...)                 # Method call
+    | E.B(E, ...)                  # Builtin Combinator call
+    | P =&gt; E                       # Lambda function
+P ::= ID | (ID, ...) | [ID, ...]   # Patterns
+T ::= int | float | string         # Scalars
+    | time | key | winspec | range # Stream types
+    | Stream[T] | Array[T; N, ...] # Collections
+    | KeyedStream[K,T]
+    | Timer | State
+</code></pre>
+<h1><a class="header" href="#combinators" id="combinators">Combinators</a></h1>
+<p>This section explores combinators from different libraries. A goal of <code>arc-script</code> is to provide comprehensions for different data types which can specialize into such combinators.</p>
+<h2><a class="header" href="#flink-datastreams" id="flink-datastreams">Flink DataStreams</a></h2>
+<p>To describe Flink's streaming <a href="https://ci.apache.org/projects/flink/flink-docs-release-1.10/dev/stream/operators/">combinators</a>, the following types are at needed:</p>
+<ul>
+<li><code>L[T]</code> is a list type (1 dimensional array).</li>
+<li><code>S[T]</code> is a stream type.</li>
+<li><code>S[T+U]</code> is a connected stream type.</li>
+<li><code>K[T]</code> is a keyed stream type.</li>
+<li><code>W[T]</code> is a windowed stream type.</li>
+<li><code>P[T]</code> is a partitioned (split) stream type.</li>
+<li><code>I[T]</code> is an iterative stream type.</li>
+<li><code>A -&gt; B</code> is a function-type.</li>
+<li>Other types are generic or scalars.</li>
+</ul>
+<pre><code>B ::=
+  process      # S[T] -&gt; (T -&gt; Timer -&gt; State -&gt; L[U]) -&gt; S[U]
+               # A flatmap operation which has access to timers and state.
+               #
+  map          # S[T] -&gt; (T -&gt; U) -&gt; S[U]
+               # Basic map.
+               #
+  flatmap      # S[T] -&gt; (T -&gt; L[U]) -&gt; S[U]
+               # Basic flatmap.
+               #
+  filter       # S[T] -&gt; (T -&gt; bool) -&gt; S[T]
+               # Basic filter.
+               #
+  keyby        # S[T] -&gt; (T -&gt; key) -&gt; K[U]
+               # Partitions the stream through a key extraction function.
+               #
+  window       # K[T] -&gt; winspec -&gt; W[T]
+               # Superimposes a window over the stream according to a specification.
+               #
+  reduce       # K[T] | W[T] -&gt; (T -&gt; T) -&gt; S[T]
+               # Aggregates elements of a stream or window with a semigroup.
+               #
+  fold         # K[T] | W[T] -&gt; T -&gt; (T -&gt; T) -&gt; S[T]
+               # Aggregates elements of a stream or window with a monoid.
+               #
+  apply        # W[T] -&gt; (L[T] -&gt; U) -&gt; S[U]
+               # Holistically aggregates the elements of a windowed stream.
+               #
+  union        # S[T] -&gt; S[T]+ -&gt; S[T]
+               # Unions multiple streams of the same type into one.
+               #
+  join         # S[T] -&gt; S[T] -&gt; (T -&gt; key) -&gt; (T -&gt; key) -&gt; winspec -&gt; W[T]
+               # Inner-joins two streams on a key and time window, pairwise.
+               # 
+  intervalJoin # K[T] -&gt; K[T] -&gt; range -&gt; S[T]
+               # Inner-joins two streams on a key and time window, pairwise.
+               # 
+  coGroup      # S[T] -&gt; S[T] -&gt; (T -&gt; key) -&gt; (T -&gt; key) -&gt; winspec -&gt; W[T]
+               # Inner-joins two streams on a key and time window, listwise.
+               #
+  connect      # S[T] -&gt; S[U] -&gt; C[T+U]
+               # Connects two streams into one with a sum-type.
+               # 
+  coMap        # S[T+U] -&gt; (T -&gt; X) -&gt; (U -&gt; X) -&gt; S[X]
+               # Mapping function over connected streams.
+               #
+  coFlatmap    # S[T+U] -&gt; (T -&gt; L[X]) -&gt; (U -&gt; L[X]) -&gt; S[X]
+               # Flatmap function over connected streams.
+               #
+  split        # S[T] -&gt; (T -&gt; L[(key, T)]) -&gt; P[T]
+               # Splits a stream into multiple by some key.
+               #
+  select       # P[T] -&gt; key+ -&gt; S[T]
+               # Selects one or more streams from a split stream.
+               # 
+  iterate      # S[T] -&gt; (S[T] -&gt; (L[T], L[T])) -&gt; S[T]
+               # Feeds back elements passed in the left tuple field.
+               # 
+  assign       # S[T] -&gt; (T -&gt; time) -&gt; S[T]
+               # Extracts a timestamp from each element.
+               # 
+  project      # S[T+] -&gt; L[int] -&gt; S[T+]
+               # Selects a subset of fields from a stream of tuples.
+               # 
+  partition    # S[T] -&gt; &lt;UDF&gt; -&gt; S[T]
+               # Physically partitions a stream according to a UDF.
+               # 
+  shuffle      # S[T] -&gt; S[T]
+               # Physically partitions a stream randomly.
+               # 
+  rebalance    # S[T] -&gt; S[T]
+               # Physically partitions a stream with round-robin.
+               # 
+  rescale      # S[T] -&gt; S[T]
+               # Partitions elements round-robin to a subset of downstream operators.
+               # 
+  broadcast    # S[T] -&gt; S[T]
+               # Broadcasts elements to every partition.
+               # 
+  restartChain # S[T] -&gt; S[T]
+               # Begin a new function-chain, starting at the previous combinator.
+               # 
+  doNotChain   # S[T] -&gt; S[T]
+               # Do not chain the previous combinator.
+               # 
+  slotShare    # S[T] -&gt; key -&gt; S[T]
+               # Assigns a slot to the stream, which can be shared among streams.
+               # 
+</code></pre>
+<h2><a class="header" href="#rust-iterators" id="rust-iterators">Rust Iterators</a></h2>
+<p>The <a href="https://danielkeep.github.io/itercheat_baked.html">iterator cheat sheet</a> lists the adaptors below, with the following types:</p>
+<ul>
+<li><code>I[T]</code> is an iterator type.
+<ul>
+<li>Can either be finite or infinite (should be obvious from the adaptor).</li>
+</ul>
+</li>
+<li><code>O[T]</code> is an option type.</li>
+<li><code>R[T,E]</code> is a result type.</li>
+<li><code>V[T]</code> is a vector type.</li>
+<li><code>N</code> is a numeral.</li>
+<li><code>A -&gt; B</code> is a function-type.</li>
+<li><code>(T,..)</code> is a tuple type.</li>
+<li><code>T</code>, <code>U</code>, <code>S</code> are generics.</li>
+</ul>
+<pre><code>-- Generators --
+empty          # () -&gt; I[T]
+               # Creates an empty iterator.
+               #
+iterate        # T -&gt; (T -&gt; I[T]) -&gt; I[T]
+               # Creates values by repeatedly applying a UDF to the last value.
+               #
+once           # T -&gt; I[T]
+               # Creates an iterator containing an element.
+               #
+repeat         # T -&gt; I[T]
+               # Creates an iterator over an infinite sequence of repeated values.
+               #
+repeatCall     # (() -&gt; T) -&gt; I[T]
+               # Creates an iterator over an infinite sequence of repeated lazy values.
+               #
+repeatN        # T -&gt; N -&gt; I[T]
+               # Creates an iterator over a finite sequence of repeated values.
+               #
+unfold         # T -&gt; (T -&gt; O[T]) -&gt; I[T]
+               # Creates an iterator by repeatedly unfolding a value.
+               #
+-- Sequences --
+batching       # I[T] -&gt; (&amp;mut I[T] -&gt; O[T]) -&gt; I[T]
+               # Consumes multiple elements to produce new ones.
+               #
+cartesian_prod # I[T] -&gt; I[U] -&gt; I[(T,U)]
+               # Cartesian product between two iterators.
+               #
+chain          # I[T] -&gt; I[T] -&gt; I[T]
+               # Appends one iterator to the other.
+               #
+chunks         # I[T] -&gt; N -&gt; I[I[T]]
+               # Turns the iterator into an iterator over iterators.
+               #
+cmp            # I[T] -&gt; I[T] -&gt; Ordering
+partial_cmp    # Lexicographically compares the elements of two iterators
+               #
+coalesce       # I[T] -&gt; (T -&gt; T -&gt; R[T,(T,T)]) -&gt; I[T]
+               # Applies a closure which attempts to merge adjacent elements.
+               #
+collect        # I[T] -&gt; V[T]
+               # Collects an iterator into a vector.
+               #
+cycle          # I[T] -&gt; I[T]
+               # Endlessly repeats an iterator.
+               #
+dedup          # I[T] -&gt; I[T]
+               # Removes all consecutive duplicates from an iterator.
+               #
+dropping       # I[T] -&gt; N -&gt; I[T]
+dropping_back  # Eagerly skips N elements from the front.
+               #
+enumerate      # I[T] -&gt; I[(int, T)]
+               # Gives an iteration count to each element.
+               #
+eq, ne, ge ..  # I[T] -&gt; I[T] -&gt; bool
+               # Returns true if the elements of both iterators are equal.
+               #
+filter         # I[T] -&gt; (T -&gt; bool) -&gt; I[T]
+               # Filters the elements through a predicate.
+               #
+filter_map     # I[T] -&gt; (T -&gt; O[U]) -&gt; I[U]
+               # Filters and maps the elements of the iterator.
+               #
+flat_map       # I[T] -&gt; (T -&gt; I[U]) -&gt; I[U]
+               # Maps and flattens the elements of the iterator.
+               #
+flatten        # I[I[T]] -&gt; I[T]
+               # Flattens one level of nesting of a nested iterator.
+               #
+group_by       # I[T] -&gt; (&amp;T -&gt; K) -&gt; I[T]
+               # Groups elements by an extracted key.
+               #
+interleave     # I[T] -&gt; I[T] -&gt; I[T]
+               # Interleaves elements of two iterators.
+               #
+int.._shortest # I[T] -&gt; I[T] -&gt; I[T]
+               # Interleaves elements of two iterators until one runs out.
+               #
+intersperse    # I[T] -&gt; T -&gt; I[T]
+               # Inserts a value between each element of an iterator.
+               #
+kmerge         # I[I[T]] -&gt; I[T]
+kmerge_by      # Flattens and merges iterators in ascending order.
+               #
+map            # I[T] -&gt; (T -&gt; U) -&gt; I[U]
+               # Applies a transformation to each element individually.
+               #
+map_results    # I[R[T,E]] -&gt; (T -&gt; U) -&gt; I[R[U,E]]
+               # Applies a transformation to all ok values of an iterator over results.
+               #
+merge          # I[T] -&gt; I[T] -&gt; I[T]
+merge_by       # Merges elements of two iterators in ascending order.
+               #
+pad_using      # I[T] -&gt; N -&gt; (N -&gt; T) -&gt; I[T]
+               # Pads the iterator by a minimum length with a closure.
+               #
+partition      # I[T] -&gt; (T -&gt; bool) -&gt; (I[T], I[T])
+partition_map  # Partitions the iterator into two iterators according to a predicate.
+               #
+rev            # I[T] -&gt; I[T]
+               # Reverses an iterator.
+               #
+scan           # I[T] -&gt; &amp;mut S -&gt; (&amp;mut S -&gt; T -&gt; O[U]) -&gt; I[U]
+               # A mix of map and fold.
+               #
+skip           # I[T] -&gt; N -&gt; I[T]
+skip_while     # Skips N number of elements from the front.
+               #
+sorted         # I[T] -&gt; I[T]
+sorted_by      # Sorts elements in ascending order.
+               #
+step           # I[T] -&gt; N -&gt; I[T]
+               # Steps over N elements for each iteration.
+               #
+take           # I[T] -&gt; N -&gt; I[T]
+take_while     # Yields an iterator over the first N elements.
+take_while_ref #
+               #
+tee            # I[T] -&gt; (I[T], I[T])
+               # Clones an iterator.
+               #
+tuple_windows  # I[T] -&gt; I[(T, T,...)]
+               # Creates a sliding window of tuples over the iterator.
+               #
+tuples         # I[T] -&gt; I[(T, T,...)]
+               # Creates a tumbling window of tuples over the iterator.
+               #
+unique         # I[T] -&gt; I[T]
+unique_by      # Removes all duplicates from an iterator.
+               #
+unzip          # I[(T,U)] -&gt; (I[T], I[U])
+               # Turns an iterator over pairs into a pair of iterators.
+               #
+while_some     # I[T] -&gt; I[T]
+               # Filters O[T] and stops on the first None.
+               #
+with_position  # I[T] -&gt; I[Position[T]]
+               # Wraps each element with a Position (First, Middle, Last).
+               #
+zip            # I[T] -&gt; I[U] -&gt; I[(T,U)]
+zip_eq         # Turns a pair of iterators into an iterator over pairs.
+zip_longest    #
+               #
+-- Free standing sequences --
+               #
+cons_tuples    # I[((T1,T2,..),T3,..)] -&gt; I[(T1,T2,..,T3,..)]
+               # Flattens tuples in an iterator over tuples.
+               #
+iproduct       # I[T1] -&gt; I[T2] -&gt; ... -&gt; I[(T1, T2, ...)]
+               # Creates an iterator over the Cartesian product of iterators.
+               #
+izip           # I[T1] -&gt; I[T2] -&gt; ... -&gt; I[(T1, T2, ...)]
+               # Zips a variadic number of iterators.
+               #
+-- Values --
+all            # I[T] -&gt; (T -&gt; bool) -&gt; bool
+               # Returns true if all elements evaluate to true.
+               #
+all_equal      # I[T] -&gt; bool
+               # Returns true if all elements are equal.
+               #
+any            # I[T] -&gt; (T -&gt; bool) -&gt; bool
+               # Returns true if any element evaluates to true.
+               #
+count          # I[T] -&gt; N
+               # Returns the count of all elements.
+               #
+find           # I[T] -&gt; (T -&gt; bool) -&gt; T
+               # Returns the first element which evaluates to true.
+               #
+find_position  # I[T] -&gt; (T -&gt; bool) -&gt; (N, T)
+               # Returns the first element which evaluates to true and its position.
+               #
+fold           # I[T] -&gt; S -&gt; (S -&gt; T -&gt; S) -&gt; S
+fold_options   # Reduces the elements into a single value using a binary operation.
+fold_results   #
+fold_while     #
+               #
+fold1          # I[T] -&gt; (T -&gt; T -&gt; T) -&gt; O[T]
+               # Fold without a base case.
+               #
+join           # I[T] -&gt; &amp;str -&gt; String
+               # Combines iterator elements into a string with a separator.
+               #
+last           # I[T] -&gt; T
+               # Returns the last element of an iterator.
+               #
+max            # I[T] -&gt; T
+max_by         # Returns the maximum element
+max_by_key     #
+min            # 
+min_by         #
+min_by_key     #
+               #
+minmax         # I[T] -&gt; (T, T)
+minmax_by      # Returns the minimum and maximum element of the iterator.
+minmax_by_key  #
+               #
+next_tuple     # I[T] -&gt; O[(T, T, ...)]
+               # Returns the next tuple of elements.
+               #
+nth            # I[T] -&gt; N -&gt; O[T]
+               # Returns the Nth element.
+               #
+position       # I[T] -&gt; (T -&gt; bool) -&gt; O[N]
+rposition      # Returns the position of the first element which evaluates to true.
+               #
+product        # I[T] -&gt; T
+               # Multiplies all elements.
+               #
+set_from       # &amp;mut I[T] -&gt; I[T] -&gt; I[T]
+               # Assign elements of the first iterator with the others.
+               #
+sum            # I[T] -&gt; T
+               # Sums all elements.
+               #
+-- Other --
+assert_equal   # I[T] -&gt; I[T]
+               # Assert both iterators match exactly.
+               #
+by_ref         # I[T] -&gt; I[&amp;T]
+               # Iterates over references to the elements to not consume the iterator.
+               #
+cloned         # I[T] -&gt; I[T]
+               # Clones an iterator.
+               #
+combinations   # I[T] -&gt; N -&gt; I[V[T]]
+               # Returns an iterator over all combinations of length N.
+               #
+diff_with      # I[T] -&gt; I[T] -&gt; O[Diff]
+               # Diffs the elements of two iterators.
+               #
+foreach        # I[T] -&gt; unit
+               # Iterates over an iterators elements.
+               #
+format         # I[T] -&gt; &amp;str -&gt; Format
+format_with    # Formats the elements with a separator.
+               #
+fuse           # I[T] -&gt; I[T]
+               # Creates an iterator which always returns None after the next Some.
+               #
+inspect        # I[T] -&gt; (&amp;T -&gt; unit) -&gt; I[T]
+               # Calls a closure on each element
+               #
+multipeek      # I[T] -&gt; I[T]
+               # Allows an iterator to be peeked at any number of times.
+               #
+multizip       # I[T] -&gt; I[U] -&gt; ... -&gt; I[(T,U,...)]
+               # Zips up to 8 elements.
+               #
+peekable       # I[T] -&gt; I[T]
+               # Allows an iterator to be peeked at once per element.
+               #
+peeking_take_w # I[T] -&gt; (I -&gt; bool) -&gt; I[T]
+               # Take while, but peekable.
+               #
+put_back       # I[T] -&gt; I[T]
+               # Creates an iterator where one element can be put back.
+               #
+put_back_n     # I[T] -&gt; I[T]
+               # Creates an iterator where multiple elements can be put back.
+               #
+rciter         # I[T] -&gt; I[T]
+               # Creates an iterator which can be iterated over by multiple handles.
+               #
+tuple_combinat # I[T] -&gt; [(T, T, ...)]
+               # Returns an iterator over all tuple combinations.
+               #
+</code></pre>
+<h2><a class="header" href="#spark-dstreams" id="spark-dstreams">Spark DStreams</a></h2>
+<p><a href="https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.streaming.dstream.DStream">Spark DStream API</a></p>
+<p>Most, if not all are supported in Flink in some sense.</p>
+<h2><a class="header" href="#graphlib-graphs" id="graphlib-graphs">GraphLib Graphs</a></h2>
+<p><a href="https://docs.rs/graphlib/0.6.2/graphlib/iterators/index.html">GraphLib</a> lists some interesting combinators for graphs, using the following types:</p>
+<ul>
+<li><code>G[T]</code> is a graph type.</li>
+<li><code>F</code> is a float type (weight).</li>
+</ul>
+<pre><code>new            # -&gt; G[T]
+with_capacity  # Creates a new graph
+reserve        #
+shrink_to_fit  #
+               #
+capacity       # G[T] -&gt; N
+               # Returns the capacity of the graph.
+               #
+add_vertex     # G[T] -&gt; T -&gt; N
+               # Adds a vertex and returns its ID.
+               #
+add_edge       # G[T] -&gt; N1 -&gt; N2 -&gt; R[..]
+               # Adds an edge between vertex N1 and N2.
+               #
+.._check_cycle # G[T] -&gt; N1 -&gt; N2 -&gt; R[..]
+               # Adds an edge and fails if it causes a cycle.
+               #
+.._with_weight # G[T] -&gt; N1 -&gt; N2 -&gt; F -&gt; R[..]
+               # Adds an edge with a weight F.
+               #
+weight         # G[T] -&gt; N1 -&gt; N2 -&gt; O[F]
+               # Returns the weight of an edge if it exists.
+               #
+set_weight     # G[T] -&gt; N1 -&gt; N2 -&gt; F -&gt; R[..]
+               # Sets the weight of an edge if it exists.
+               #
+has_edge       # G[T] -&gt; N1 -&gt; N2 -&gt; bool
+               # Checks if an edge exists.
+               #
+edge_count     # G[T] -&gt; N
+               # Returns the total number of edges in the graph.
+               #
+vertex_count   # G[T] -&gt; N
+               # Returns the total number of vertices in the graph.
+               #
+fetch          # G[T] -&gt; N -&gt; O[&amp;T]
+fetch_mut      # Returns a reference to the vertex with ID N, if present.
+               #
+remove         # G[T] -&gt; N -&gt; unit
+               # Removes a vertex from the graph.
+               #
+remove_edge    # G[T] -&gt; N -&gt; N -&gt; unit
+               # Removes an edge from the graph.
+               #
+retain         # G[T] -&gt; (&amp;T -&gt; bool) -&gt; unit
+               # Filters vertices using the specified predicate.
+               #
+fold           # G[T] -&gt; S -&gt; (T -&gt; S -&gt; S) -&gt; S
+               # Folds vertices in depth-first order.
+               #
+map            # G[T] -&gt; (&amp;T -&gt; U) -&gt; G[U]
+               # Maps vertices of the graph.
+               #
+is_cyclic      # G[T] -&gt; bool
+               # Returns true if the graph contains cycles.
+               #
+roots_count    # G[T] -&gt; N
+               # Returns the number of root-vertices of the graph.
+               #
+neighbours_c.. # G[T] -&gt; N -&gt; N
+in_neighbors_. # Returns the total count of neighboring vertices of a vertex.
+out_neighbors_ #
+               # 
+               # TODO
+</code></pre>
+<h1><a class="header" href="#sources" id="sources">Sources</a></h1>
+<h2><a class="header" href="#spark-structured-streaming" id="spark-structured-streaming">Spark Structured Streaming</a></h2>
+<ul>
+<li><a href="https://spark.apache.org/docs/latest/api/java/org/apache/spark/sql/streaming/DataStreamReader.html">DataStreamReader/DataSetReader</a>.</li>
+<li><a href="">Kafka</a></li>
+<li></li>
+</ul>
+<pre><code>File(path, maxFilesPerTrigger, latestFirst, fileNameOnly)
+  text
+    wholetext                 # Read file as a single row.
+    lineSep                   # Set line separator.
+  csv
+    sep                       # Set column separator.
+    encoding                  # Encoding type.
+    quote                     # Set quotation character.
+    escape                    # Set quotation escape character.
+    charToEscapeQuoteEscaping # Set quotation escape-escape character.
+    comment                   # Set comment string.
+    header                    # Use first line as header.
+    inferSchema               # Enable schema inference.
+    ignoreLeadingWhitespace   # Ignore leading whitespace.
+    ignoreTrailingWhitespace  # Ignore trailing whitespace.
+    nullValue                 # Set null-value string.
+    emptyValue                # Set empty-value string.
+    nanValue                  # Set non-number-value string.
+    positiveInf               # Set positive-infinity-value string.
+    negativeInf               # Set negative-infinity-value string.
+    dateFormat                # Set date-format.
+    timestampFormat           # Set timestamp-format.
+    timeZone                  # Set timezone for parsing timestamps.
+    maxColumns                # Set column upper-bound-limit.
+    maxCharsPerColumn         # Set chars-per-column upper-bound-limit.
+    mode                      # How to deal with a corrupt record.
+      PERMISSIVE              # Take note of it and null other fields.
+      DROPMALFORMED           # Drop it.
+      FAILFAST                # Throw an exception.
+    columnNameOfCorruptRecord # Set name of corrupt fields.
+    multiLine                 # Enable multi-line records.
+  json
+    primitivesAsString        # Parse primitive values as strings.
+    prefersDecimal            # Floating point numbers become decimals (not doubles).
+    allowComments             # Allow C-style comments.
+    allowUnquotedFieldNames   # Allow unquoted field names.
+    allowSingleQuotes         # Allow single quotes.
+    allowNumericLeadingZeros  # Allow leading zeroes in numbers.
+    allowBackslashEscapingAnyCharacter # Allow backslash to escape any character
+    allowUnquotedControlChars # Allow ASCII control-characters
+    mode                      # (Same as csv)
+    columnNameOfCorruptRecord # (Same as csv)
+    dateFormat                # (Same as csv)
+    timestampFormat           # (Same as csv)
+    timeZone                  # (Same as csv)
+    multiLine                 # (Same as csv)
+    lineSep                   # (Same as csv)
+    dropFieldIfAllNull        # Ignore column if all values are null/empty
+  orc                         # (No options)
+  parquet
+    mergeSchema               # Merge schemas from multiple parquet files.
+Socket(host, port)
+Rate(rowsPerSecond, rampUpTime, numPartitions) # Data generator
+Kafka()
+</code></pre>
+<h1><a class="header" href="#sinks" id="sinks">Sinks</a></h1>
+<h1><a class="header" href="#data-formats--types" id="data-formats--types">Data Formats &amp; Types</a></h1>
+<p>Arc programs contain two components:</p>
+<ul>
+<li>Source and sink schema specification.</li>
+<li>Pipeline logic.</li>
+</ul>
+<p>Note:</p>
+<ul>
+<li>Arc should maintain type-safety between both components.</li>
+<li>Type inference should be global.</li>
+<li>Type inference should be dependent.</li>
+<li>To fulfill the previous two requirements, recursion must be prohibited.</li>
+</ul>
+<p>Example schema specification:</p>
+<pre><code>source: foo {
+  format: protobuf {
+    uri: bar.proto,
+  },
+  feed: kafka {
+    endpoint: localhost:88
+  }
+}
+
+sink: bar {
+  format: json {
+    &quot;x&quot;: &lt;i32&gt;,
+    &quot;y&quot;: &lt;i32&gt;,
+    &quot;active&quot;: &lt;bool&gt;,
+    &quot;data&quot;: [&lt;i32&gt;]
+  },
+  feed: file {
+    path: bar.json
+  }
+}
+</code></pre>
+<p>Notes:</p>
+<ul>
+<li>
+<p>The formats (how the data looks like) are with their respective types:</p>
+<ul>
+<li><a href="https://developers.google.com/protocol-buffers/docs/proto"><code>protobuf</code></a>
+<ul>
+<li>Numbers: <code>double</code>, <code>float</code>, <code>int32..64</code>, <code>uint32..64</code>, <code>sint32..64</code>, <code>fixed32..64</code>, <code>sfixed32..64</code></li>
+<li>Booleans: <code>bool</code></li>
+<li>Strings: <code>string</code></li>
+<li>Bytes: <code>bytes</code></li>
+<li>Messages: <code>IDENTIFIER</code> (Protobuf types)</li>
+<li>Enums: <code>enum</code></li>
+<li>Maps: <code>map&lt;KeyType,ValueType&gt;</code></li>
+<li>Nested types &amp; Parent types</li>
+<li>Repeated: <code>repeated</code> (Field can occur multiple times)</li>
+<li>Any: <code>Any</code> (Any kind of type)</li>
+<li>Oneof: <code>oneof</code> (Only one of the fields can occur)</li>
+<li>Notes:
+<ul>
+<li>Types can be optional/required.</li>
+<li>Types can have default values.</li>
+<li>Fields have a UID.</li>
+<li><code>enum_allow_alias</code> permits aliased variants in enums.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><code>json</code>
+<ul>
+<li>Numbers: <code>i8..128</code>, <code>u8..128</code>, <code>f32..64</code></li>
+<li>Strings: <code>str</code></li>
+<li>Booleans: <code>bool</code></li>
+<li>Arrays: <code>[...]</code></li>
+<li>Objects: <code>{...}</code></li>
+<li>Null: <code>null</code>.</li>
+</ul>
+</li>
+<li><code>csv</code>
+<ul>
+<li>Numbers: <code>i8..128</code>, <code>u8..128</code>, <code>f32..64</code></li>
+<li>Strings: <code>str</code></li>
+<li>Booleans: <code>bool</code></li>
+</ul>
+</li>
+<li><a href="https://github.com/apache/arrow/blob/master/format/Schema.fbs"><code>arrow</code></a>
+<ul>
+<li>Null</li>
+<li>Int</li>
+<li>FloatingPoint</li>
+<li>Binary</li>
+<li>Utf8</li>
+<li>Bool</li>
+<li>Decimal</li>
+<li>Date</li>
+<li>Time</li>
+<li>Timestamp</li>
+<li>Interval</li>
+<li>List</li>
+<li>Struct_</li>
+<li>Union</li>
+<li>FixedSizeBinary</li>
+<li>FixedSizeList</li>
+<li>Map</li>
+<li>Duration</li>
+<li>LargeBinary</li>
+<li>LargeUtf8</li>
+<li>LargeList</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>The endpoints (where the data comes from and goes to) are:</p>
+<ul>
+<li>File
+<ul>
+<li>URI</li>
+</ul>
+</li>
+<li>Kafka</li>
+</ul>
+</li>
+<li>
+<p>Feature: Type providers</p>
+<ul>
+<li><code>arc-script sync</code> command</li>
+<li>Occurrences:
+<ul>
+<li>https://spark.apache.org/docs/latest/sql-data-sources-json.html</li>
+<li>https://docs.microsoft.com/en-us/dotnet/fsharp/tutorials/type-providers/</li>
+</ul>
+</li>
+<li>Types should not only declarable, but also downloadable
+<ul>
+<li>Specify a protobuf, where types are downloaded directly</li>
+<li>Specify a JSON/CSV dataset, where data is downloaded (maybe single record) and types are parsed/inferred</li>
+<li>Note:
+<ul>
+<li>Data might be compressed, encrypted, remote/local</li>
+<li>Might be worth specifying some information outside of the code (Arc.toml)?</li>
+<li>Keep remote type information cached in some build directory</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="chapter-3-tutorial.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+
+                        
+                            <a rel="next" href="chapter-5-arc-mlir.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="chapter-3-tutorial.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="chapter-5-arc-mlir.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+
+        
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+
+        
+
+        
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
+    </body>
+</html>
