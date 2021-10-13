@@ -380,6 +380,17 @@ def MergeOp : Arc_Op<"merge", [NoSideEffect, Linear]> {
   let extraClassDeclaration = [{ LogicalResult customVerify(); }];
 }
 
+def ReceiveOp : Arc_Op<"receive", [SameOperandsAndResultType]> {
+  let summary = "wait for an event";
+  let description = [{
+  }];
+  let arguments = (ins AnyEnum:$event);
+  let results = (outs AnyEnum:$result);
+  let assemblyFormat =
+    " $event attr-dict `:` type($result)";
+  let verifier = [{ return ::verify(*this); }];
+}
+
 def ResultOp : Arc_Op<"result", [NoSideEffect]> {
   let summary = "materialize a builder into a value";
   let description = [{

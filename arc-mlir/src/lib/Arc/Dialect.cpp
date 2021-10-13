@@ -427,6 +427,25 @@ LogicalResult IndexTupleOp::customVerify() {
   return mlir::success();
 }
 
+static LogicalResult verify(ReceiveOp op) {
+  // Check that we're located inside a task
+  FuncOp function = op->getParentOfType<FuncOp>();
+
+  if (!function->hasAttr("arc.is_event_handler")) {
+    op.emitOpError("can only be used inside an event handler");
+    return mlir::failure();
+  }
+
+  // Check that our event-argument is the same as the second argument
+  // to the hander (That our result has the right type is enforced by
+  // the SameOperandsAndResultType trait in the generated verifier).
+  if (function.getArgument(1) != op.event()) {
+    op.emitOpError("event argument is not the handler event");
+    return mlir::failure();
+  }
+  return mlir::success();
+}
+
 LogicalResult ArcBlockResultOp::customVerify() {
   // Check that our type matches the type of our parent if-op
   auto Op = this->getOperation();
