@@ -1,5 +1,6 @@
 // RUN: arc-mlir %s
 // RUN: arc-mlir %s -canonicalize
+// RUN: arc-mlir %s -to-fsm
 
 module @toplevel {
   func @my_handler(%this : !arc.struct<x : si32>,
