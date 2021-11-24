@@ -32,7 +32,7 @@ default       = ["backend_local"]
 
 [dependencies]
 arc-script-api-include = { version = "=0.0.0", path = "api/include" }
-arc-script-codegen     = { version = "=0.0.0", path = "codegen" }
+arc-script-codegen     = { version = "=0.0.0", path = "../arc-codegen", package = "arc-codegen" }
 
 [workspace]
 members = [
@@ -43,14 +43,12 @@ members = [
   "api/include/proc",
   "api/build",
   "api/include",
-  "codegen",
   "repl",
   "lsp",
   "cli",
   "website/repl",
   "tests/unit",
   "benches",
-  "runtime",
   # "api/python",
   # "website/web-lsp",
 ]
@@ -62,10 +60,8 @@ default-members = [
   "compiler/macros",
   "api/build",
   "api/include",
-  "codegen",
   "repl",
   "cli",
-  "runtime",
   # "api/include/proc",
   # "lsp",
   # "api/quote",
