@@ -434,8 +434,6 @@ void RustFuncOp::writeRust(RustPrinterStream &PS) {
     } else if ((isTask || isMethod) && i == 0) {
       PS << "&mut self";
       PS.addAlias(v, "self");
-    } else if (isTask && i == 2) {
-      // We skip this argument
     } else {
       if (i != 0)
         PS << ", ";
@@ -670,7 +668,7 @@ void RustCompOp::writeRust(RustPrinterStream &PS) {
 }
 
 void RustEmitOp::writeRust(RustPrinterStream &PS) {
-  PS << "self.emit(" << value() << ");\n";
+  PS << "self.emit(" << value() << ", " << stream() << ");\n";
 }
 
 void RustEnumAccessOp::writeRust(RustPrinterStream &PS) {
