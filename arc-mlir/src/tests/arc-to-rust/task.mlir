@@ -1,5 +1,6 @@
 // RUN: arc-mlir-rust-test %t %s
 // RUN: arc-mlir-rust-test %t-canon %s -canonicalize
+// RUN: arc-mlir-rust-test %t-roundtrip-scf %s -canonicalize -remove-scf -canonicalize -to-scf -canonicalize
 
 module @toplevel {
   func @my_handler(%this : !arc.struct<x : si32>,
