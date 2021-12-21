@@ -74,18 +74,18 @@ public:
         Includefile(includefile){};
 
   void flush(llvm::raw_ostream &o) {
-    o << "#[allow(non_snake_case)]\n"
-      << "#[allow(unused_must_use)]\n"
-      << "#[allow(dead_code)]\n"
-      << "#[allow(unused_variables)]\n"
-      << "#[allow(unused_imports)]\n"
-      << "#[allow(unused_braces)]\n";
+    o << "#![allow(non_snake_case)]\n"
+      << "#![allow(unused_must_use)]\n"
+      << "#![allow(dead_code)]\n"
+      << "#![allow(unused_variables)]\n"
+      << "#![allow(unused_imports)]\n"
+      << "#![allow(unused_braces)]\n"
+      << "#![allow(non_camel_case_types)]\n";
 
     o << "pub mod " << ModuleName
       << "{\n"
          "use super::*;\n"
-      << "pub use arc_script::codegen::*;\n"
-      << "pub use arc_script::codegen;\n"
+      << "pub use arc_codegen::*;\n"
       << "pub use hexf::*;\n";
 
     for (auto i : CrateDirectives)

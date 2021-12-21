@@ -380,7 +380,7 @@ void RustFuncOp::writeRust(RustPrinterStream &PS) {
         (*this)->getAttrOfType<StringAttr>("arc.task_name").getValue();
 
     // Construct rewrite directive
-    PS << "#[codegen::rewrite(";
+    PS << "#[rewrite(";
     mlir::ModuleOp m = cast<mlir::ModuleOp>(getOperation()->getParentOp());
     for (auto f : m.getOps<RustFuncOp>()) {
       if (f->hasAttr("arc.is_event_handler"))
@@ -404,7 +404,7 @@ void RustFuncOp::writeRust(RustPrinterStream &PS) {
     PS.addAlias(st, stateTypeName);
 
     RustEnumType inTy = front().getArgument(1).getType().cast<RustEnumType>();
-    PS << "#[codegen::rewrite]\n"
+    PS << "#[rewrite]\n"
        << "pub enum IInterface {\n";
     for (unsigned i = 0; i < inTy.getNumVariants(); i++) {
       PS << inTy.getVariantName(i) << "(" << inTy.getVariantType(i) << "),\n";
@@ -415,7 +415,7 @@ void RustFuncOp::writeRust(RustPrinterStream &PS) {
     RustStreamType outStream =
         front().getArgument(2).getType().cast<RustStreamType>();
     RustEnumType outTy = outStream.getType().cast<RustEnumType>();
-    PS << "#[codegen::rewrite]\n"
+    PS << "#[rewrite]\n"
        << "pub enum OInterface {\n";
     for (unsigned i = 0; i < outTy.getNumVariants(); i++) {
       PS << outTy.getVariantName(i) << "(" << outTy.getVariantType(i) << "),\n";
@@ -1042,7 +1042,7 @@ RustEnumTypeStorage::printAsRust(RustPrinterStream &ps) const {
   // First ensure that any structs used by this struct are defined
   emitNestedTypedefs(ps);
 
-  os << "#[codegen::rewrite]\n";
+  os << "#[rewrite]\n";
 
   os << "pub enum ";
   printAsRustNamedType(os) << " {\n";
@@ -1524,7 +1524,7 @@ RustStructTypeStorage::printAsRust(RustPrinterStream &ps) const {
   // First ensure that any structs used by this struct are defined
   emitNestedTypedefs(ps);
 
-  os << "#[codegen::rewrite]\n";
+  os << "#[rewrite]\n";
 
   os << "pub struct ";
   printAsRustNamedType(os) << " {\n  ";
