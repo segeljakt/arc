@@ -1,0 +1,10 @@
+README.md
+setup.py
+arclib/__init__.py
+arclib/operator.py
+arclib/pipeline.py
+arclib/stream.py
+arclib.egg-info/PKG-INFO
+arclib.egg-info/SOURCES.txt
+arclib.egg-info/dependency_links.txt
+arclib.egg-info/top_level.txt
