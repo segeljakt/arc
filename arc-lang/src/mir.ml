@@ -33,7 +33,6 @@ and ty =
 
 and expr =
   | EAccess   of var * name
-  | EEq       of var * var
   | ECall     of var * vars
   | ECast     of var * ty
   | EEmit     of var * var

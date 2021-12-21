@@ -44,7 +44,6 @@ and ty =
 
 and expr =
   | EAccess   of var * name
-  | EEq       of var * var
   | ECall     of var * vars
   | ECast     of var * ty
   | EEnwrap   of path * tys * var
@@ -198,7 +197,6 @@ and free_vars ps b =
   and fv_expr e ctx =
     match e with
     | EAccess (v, _) -> ctx |> fv_var v
-    | EEq (v0, v1) -> ctx |> fv_var v0 |> fv_var v1
     | ECall (v, vs) -> ctx |> fv_var v |> fv_vars vs
     | ECast (v, _) -> ctx |> fv_var v
     | EEmit (v0, v1) -> ctx |> fv_var v0 |> fv_var v1

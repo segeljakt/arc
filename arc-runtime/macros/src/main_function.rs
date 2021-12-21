@@ -11,7 +11,7 @@ pub(crate) fn rewrite(_attr: syn::AttributeArgs, item: syn::ItemFn) -> pm::Token
     let block = &item.block;
     let id = item.sig.ident;
     let component_id = new_id(format!("{}Component", id));
-    let run_id = new_id(format!("run_{}Component", id));
+    let run_id = new_id(format!("{}_run", id));
 
     quote::quote! (
 
@@ -19,6 +19,7 @@ pub(crate) fn rewrite(_attr: syn::AttributeArgs, item: syn::ItemFn) -> pm::Token
         struct #component_id {
             ctx: ComponentContext<Self>,
         }
+
         impl #component_id {
             fn new() -> Self {
                 Self {
@@ -26,11 +27,11 @@ pub(crate) fn rewrite(_attr: syn::AttributeArgs, item: syn::ItemFn) -> pm::Token
                 }
             }
         }
+
         #[rewrite]
         fn #run_id() {
             #block
         }
-
 
         impl ComponentLifecycle for #component_id {
             fn on_start(&mut self) -> Handled {

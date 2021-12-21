@@ -111,48 +111,6 @@ and pr_ssa (lhs, e) ctx =
       pr_paren (pr_arg_type a0) ctx;
       pr " -> ";
       pr_lhs_type lhs ctx;
-  | Mlir.EBinOp (op, a0, a1) ->
-      begin match op with
-      | Mlir.BAdd Mlir.NInt   -> pr "arc.addi"
-      | Mlir.BAdd Mlir.NFlt   -> pr "addf"
-      | Mlir.BSub Mlir.NInt   -> pr "arc.subi"
-      | Mlir.BSub Mlir.NFlt   -> pr "subf"
-      | Mlir.BMul Mlir.NInt   -> pr "arc.muli"
-      | Mlir.BMul Mlir.NFlt   -> pr "mulf"
-      | Mlir.BDiv Mlir.NInt   -> pr "arc.divi"
-      | Mlir.BDiv Mlir.NFlt   -> pr "divf"
-      | Mlir.BMod Mlir.NInt   -> pr "arc.remi"
-      | Mlir.BMod Mlir.NFlt   -> pr "remf"
-      | Mlir.BPow Mlir.NInt   -> pr "arc.powi"
-      | Mlir.BPow Mlir.NFlt   -> pr "math.powf"
-      | Mlir.BLt  Mlir.NInt   -> pr "arc.cmpi lt,"
-      | Mlir.BLt  Mlir.NFlt   -> pr "cmpf olt,"
-      | Mlir.BLeq Mlir.NInt   -> pr "arc.cmpi le,"
-      | Mlir.BLeq Mlir.NFlt   -> pr "cmpf ole,"
-      | Mlir.BGt  Mlir.NInt   -> pr "arc.cmpi gt,"
-      | Mlir.BGt  Mlir.NFlt   -> pr "cmpf ogt,"
-      | Mlir.BGeq Mlir.NInt   -> pr "arc.cmpi ge,"
-      | Mlir.BGeq Mlir.NFlt   -> pr "cmpf oge,"
-      | Mlir.BEqu Mlir.EqInt  -> pr "arc.cmpi eq,"
-      | Mlir.BEqu Mlir.EqFlt  -> pr "cmpf oeq,"
-      | Mlir.BEqu Mlir.EqBool -> pr "cmpi eq,"
-      | Mlir.BNeq Mlir.EqInt  -> pr "arc.cmpi ne,"
-      | Mlir.BNeq Mlir.EqFlt  -> pr "cmpf one,"
-      | Mlir.BNeq Mlir.EqBool -> pr "cmpi ne,"
-      | Mlir.BAnd             -> pr "and"
-      | Mlir.BOr              -> pr "or"
-      | Mlir.BXor             -> pr "xor"
-      | Mlir.BBand            -> pr "arc.and"
-      | Mlir.BBor             -> pr "arc.or"
-      | Mlir.BBxor            -> pr "arc.xor"
-      | _                     -> panic "Undefined op"
-      end;
-      pr " ";
-      pr_arg_var a0 ctx;
-      pr ", ";
-      pr_arg_var a1 ctx;
-      pr " : ";
-      pr_arg_type a0 ctx;
   | Mlir.ECall (a0, args) ->
       pr "call_indirect ";
       pr_arg_var a0 ctx;
@@ -221,7 +179,7 @@ and pr_ssa (lhs, e) ctx =
       | Mlir.CFloat f ->
           pr "arith.constant %f : f32" f;
       | Mlir.CBool b ->
-          pr "constant %b : i0" b;
+          pr "arith.constant %b" b;
       | Mlir.CFun x ->
           pr "constant @%s : " x;
           pr_lhs_type lhs ctx;

@@ -13,7 +13,7 @@ configure_lit_site_cfg(
 
 set(ARC_MLIR_TEST_DEPENDS
   FileCheck count not
-  arc-mlir
+  arc-mlir arc-lang
 )
 
 add_lit_testsuite(check-arc-mlir "Running the ARC-MLIR regression tests"
