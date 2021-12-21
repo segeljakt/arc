@@ -1,7 +1,7 @@
 //! Macros for using arbitrary enums without having to
 //! implement a bunch of boilerplate methods.
 //!
-//! Requirements which must be satisfied by arc-script:
+//! Requirements which must be satisfied by arc-lang:
 //! * Each enum variant has exactly one field.
 //! * Each enum variant identifier is globally unique.
 //!
