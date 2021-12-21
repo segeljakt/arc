@@ -550,9 +550,6 @@ and infer_ssa_rhs ctx (v0, t0, e0) =
       ctx |> unify (Hir.TNominal (["Stream"], [t0])) (typeof v1)
   | Hir.EOn _ ->
       todo ()
-  | Hir.EEq (v1, v2) ->
-      ctx |> unify t0 (atom "bool")
-          |> unify (typeof v1) (typeof v2)
   | Hir.EIf (v1, b0, b1) ->
       let (t2, ctx) = infer_block b0 ctx in
       let (t3, ctx) = infer_block b1 ctx in

@@ -12,9 +12,5 @@ mod tests {
 
    let tmp2 = ok4();
    assert_eq!(tmp2, 4711);
-
-   let tmp3 = ok5();
-   assert_eq!(tmp3, (17, false),);
-
   }
 }

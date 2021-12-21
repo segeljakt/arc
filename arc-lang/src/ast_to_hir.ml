@@ -583,10 +583,6 @@ and lower_expr expr ctx =
       lower_expr (Ast.EUnOp (Ast.UNot, (Ast.EBinOp (Ast.BIn, e0, e1)))) ctx
   | Ast.EBinOp (Ast.BNeq, e0, e1) ->
       lower_expr (Ast.EUnOp (Ast.UNot, (Ast.EBinOp (Ast.BEq, e0, e1)))) ctx
-  | Ast.EBinOp (Ast.BEq, e0, e1) ->
-      let (v0, ctx) = lower_expr e0 ctx in
-      let (v1, ctx) = lower_expr e1 ctx in
-      ctx |> Ctx.add_expr (Hir.EEq (v0, v1))
   | Ast.EBinOp (op, e0, e1) ->
       let (v0, ctx) = lower_binop op ctx in
       let (v1, ctx) = lower_expr e0 ctx in

@@ -14,46 +14,49 @@ extern type i16;
 @{intrinsic: "si32"}
 extern type i32;
 
-@{intrinsic: "add_si32"}
+@{intrinsic: "add_i32"}
 extern def +(i32, i32): i32;
 
-@{intrinsic: "sub_si32"}
+@{intrinsic: "sub_i32"}
 extern def -(i32, i32): i32;
 
-@{intrinsic: "mul_si32"}
+@{intrinsic: "mul_i32"}
 extern def *(i32, i32): i32;
 
-@{intrinsic: "div_si32"}
+@{intrinsic: "div_i32"}
 extern def /(i32, i32): i32;
 
-@{intrinsic: "pow_si32"}
+@{intrinsic: "pow_i32"}
 extern def **(i32, i32): i32;
 
-@{intrinsic: "rem_si32"}
+@{intrinsic: "rem_i32"}
 extern def %(i32, i32): i32;
 
-@{intrinsic: "geq_si32"}
+@{intrinsic: "eq_i32"}
+extern def ==(i32, i32): bool;
+
+@{intrinsic: "geq_i32"}
 extern def >=(i32, i32): bool;
 
-@{intrinsic: "leq_si32"}
+@{intrinsic: "leq_i32"}
 extern def <=(i32, i32): bool;
 
-@{intrinsic: "gt_si32"}
+@{intrinsic: "gt_i32"}
 extern def >(i32, i32): bool;
 
-@{intrinsic: "lt_si32"}
+@{intrinsic: "lt_i32"}
 extern def <(i32, i32): bool;
 
-@{intrinsic: "bor_si32"}
+@{intrinsic: "or_i32"}
 extern def bor(i32, i32): bool;
 
-@{intrinsic: "bxor_si32"}
+@{intrinsic: "xor_i32"}
 extern def bxor(i32, i32): bool;
 
-@{intrinsic: "band_si32"}
+@{intrinsic: "and_i32"}
 extern def band(i32, i32): bool;
 
-@{intrinsic: "neg_si32"}
+@{intrinsic: "neg_i32"}
 extern def neg(i32): i32;
 
 extern def to_string(i32): String;
@@ -89,16 +92,16 @@ extern type f64;
 @{intrinsic: "i1"}
 extern type bool;
 
-@{intrinsic: "and_bool"}
+@{intrinsic: "and_i1"}
 extern def and(bool, bool): bool;
 
-@{intrinsic: "or_bool"}
+@{intrinsic: "or_i1"}
 extern def or(bool, bool): bool;
 
-@{intrinsic: "xor_bool"}
+@{intrinsic: "xor_i1"}
 extern def xor(bool, bool): bool;
 
-@{intrinsic: "not_bool"}
+@{intrinsic: "not_i1"}
 extern def not(bool): bool;
 
 # ------------------------------------------------------
