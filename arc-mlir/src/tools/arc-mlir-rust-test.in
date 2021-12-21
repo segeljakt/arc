@@ -9,12 +9,14 @@ export ARC_CODEGEN_SOURCE_DIR="@ARC_CODEGEN_SRC_DIR@"
 export ARC_RUNTIME_SOURCE_DIR="@ARC_RUNTIME_SRC_DIR@"
 
 WORK_DIR="$1"
+# WORK_DIR="$(echo "$1" | sed 's/\.arc//g')"
 MLIR_FILE="$2"
 shift 2 # The rest of the arguments goes to arc-mlir
 
 MAIN="${WORK_DIR}/src/main.rs"
 TEST_NAME=$(basename ${WORK_DIR})
 TEST_NAME=${TEST_NAME//.mlir.tmp/}
+TEST_NAME=${TEST_NAME//.arc.tmp/}
 export TEST_NAME=${TEST_NAME//-/_}
 
 CARGO_DEP_FRAGMENT="${MLIR_FILE%.mlir}.cargo-dep"
@@ -48,8 +50,6 @@ description = "Generic MLIR-to-Rust test case"
 insta               = { version = "1.6.0", features = ["glob"] }
 regex               = { version = "1.4.3" }
 lazy_static         = { version = "1.4.0" }
-# arcon               = { git = "https://github.com/segeljakt/arcon" }
-arc-codegen         = { version = "=0.0.0", path = "${ARC_CODEGEN_SOURCE_DIR}" }
 arc-runtime         = { version = "=0.0.0", path = "${ARC_RUNTIME_SOURCE_DIR}" }
 hexf                = { version = "0.2.1" }
 ndarray             = { version = "0.13.0" }
