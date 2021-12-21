@@ -1,5 +1,5 @@
-pub fn callee_void_void() {
-}
+#[rewrite]
+pub fn callee_void_void() {}
 
 pub fn callee_si32_si32(x: i32) -> i32 {
     return x
@@ -18,7 +18,7 @@ pub fn callee_struct(x : Struct3fooi32End) -> Struct3fooi32End {
     return x
 }
 
-pub fn callee_mixed(x : (i32,i32, Struct1ai32End))
-		    -> (i32,i32, Struct1ai32End) {
+#[rewrite]
+pub fn callee_mixed(x : (i32,i32, Struct1ai32End)) -> (i32, i32, Struct1ai32End) {
     return x
 }

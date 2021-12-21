@@ -230,8 +230,6 @@ and lower_expr t e ctx =
   match e with
   | Mir.EAccess (v0, x0) ->
       (Mlir.EAccess (arg v0, x0), ctx)
-  | Mir.EEq (v0, v1) ->
-      (Mlir.EBinOp (Mlir.BEqu (int_or_float_or_bool t), arg v0, arg v1), ctx)
   | Mir.ECall (v0, vs) ->
       (Mlir.ECall (arg v0, args vs), ctx)
   | Mir.ECast _ -> todo ()

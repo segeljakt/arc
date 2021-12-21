@@ -5,12 +5,13 @@ use proc_macro2 as pm2;
 
 mod derives;
 mod enums;
+#[cfg(not(feature = "legacy"))]
 mod functions;
 mod main_function;
 mod nonpersistent_tasks;
 mod persistent_tasks;
-mod structs;
 mod procedural;
+mod structs;
 
 #[proc_macro_derive(Abstract)]
 pub fn derive_abstract(input: TokenStream) -> TokenStream {
@@ -172,7 +173,6 @@ pub fn erase(input: TokenStream) -> TokenStream {
     procedural::erase(input)
 }
 
-
 #[proc_macro]
 pub fn unerase(input: TokenStream) -> TokenStream {
     procedural::unerase(input)
@@ -194,7 +194,10 @@ pub fn rewrite(attr: TokenStream, input: TokenStream) -> TokenStream {
         syn::Item::Fn(item) if has_meta_key("main", &get_metas(&attr)) => {
             main_function::rewrite(attr, item)
         }
+        #[cfg(not(feature = "legacy"))]
         syn::Item::Fn(item) => functions::rewrite(attr, item),
+        #[cfg(feature = "legacy")]
+        syn::Item::Fn(item) => quote::quote!(#item).into(),
         _ => panic!(
             "{}",
             format!(
