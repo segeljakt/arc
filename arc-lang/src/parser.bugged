@@ -1,0 +1,284 @@
+%nonassoc STMT
+%left "=" "in" "!"
+%left ".." "..="
+%left "bor" "band" "bxor" "or" "xor" "and"
+%nonassoc "!=" "=="
+%left "<" ">" "<=" ">="
+%left "+" "-" "%"
+%left "*" "/"
+%nonassoc PREFIX
+%nonassoc SUFFIX
+%right "**"
+%nonassoc "as"
+%left "." "[" "("
+%left INVOKE
+
+(* %start <Ast.ast> program *)
+%start <Ast.expr> single_expr
+
+%%
+
+(* program: llist(item) Eof { $1 } *)
+single_expr: expr Eof { $1 }
+
+(* Utilities *)
+%inline paren(x): "(" x ")" { $2 }
+%inline brack(x): "[" x "]" { $2 }
+%inline brace(x): "{" x "}" { $2 }
+%inline angle(x): "<" x ">" { $2 }
+
+%inline fst(a, b): a b { $1 }
+%inline snd(a, b): a b { $2 }
+
+%inline llist(x):
+  llist_rev(x) { $1 |> List.rev }
+
+llist_rev(x):
+  | { [] }
+  | llist_rev(x) x { $2::$1 }
+
+%inline nonempty_llist(x):
+  nonempty_llist_rev(x) { $1 |> List.rev }
+
+nonempty_llist_rev(x): 
+  | x { [$1] }
+  | nonempty_llist_rev(x) x { $2::$1 }
+
+%inline separated_nonempty_llist(s, x):
+  separated_nonempty_llist_rev(s, x) { $1 |> List.rev }
+
+separated_nonempty_llist_rev(s, x): 
+  | x { [$1] }
+  | separated_nonempty_llist_rev(s, x) s x { $3::$1 }
+
+%inline separated_llist(s, x):
+  | { [] }
+  | separated_nonempty_llist(s, x) { $1 }
+
+(* The grammar *)
+
+%inline annot: Name ":" lit { ($1, $3) }
+%inline annots: "@" "{" separated_llist(Comma, annot) "}" { $3 }
+
+%inline item:
+  | annots? "extern" "def" defname generics? paren(separated_llist(",", ty)) ty_annot? ";"
+    { Ast.IExternDef ($1, $4, $5, $6, $7) }
+  | annots? "type" name generics? "=" ty ";"
+    { Ast.ITypeAlias ($1, $3, $4, $6) }
+  | annots? "extern" "type" name generics? ";"
+    { Ast.IExternType ($1, $4, $5) }
+  | annots? "enum" name generics? brace(variants)
+    { Ast.IEnum ($1, $3, $4, $5) }
+  | annots? "class" name generics? brace(llist(decl))
+    { Ast.IClass ($1, $3, $4, $5) }
+  | annots? "instance" generics? path ty_args? brace(llist(def))
+    { Ast.IInstance ($1, $3, $4, $5, $6) }
+  | annots? "def" defname generics? params ty_annot? body
+    { Ast.IDef ($1, $3, $4, $5, $6, $7) }
+  | annots? "mod" name brace(llist(item))
+    { Ast.IMod ($1, $3, $4) }
+  | annots? "task" defname generics? params ":" params body
+    { Ast.ITask ($1, $3, $4, $5, $6, $7) }
+  | annots? "use" path alias(path?) ";"
+    { Ast.IUse ($1, $3, $4) }
+  | annots? "val" name ty_annot? "=" expr ";"
+    { Ast.IVal ($1, $3, $4, $6) }
+
+%inline decl: "def" name generics? params ty_annot?
+  { ($2, $3, $4, $5) }
+
+%inline def: "def" name generics? params ty_annot? block
+  { ($2, $3, $4, $5, $6) }
+
+%inline body:
+  | "=" expr { Some ([], Some $2) }
+  | ";" { None }
+  | block { Some $1 }
+
+%inline ty_annot: ":" ty { $2 }
+
+%inline param: pat ty_annot? { ($1, $2) }
+%inline params: paren(separated_llist(",", param)) { $1 }
+
+%inline generic: Name { $1 }
+%inline generics: "[" separated_llist(",", generic) "]" { $2 }
+
+(* %inline intf: *)
+(*   | paren(ports) { Ast.PTagged $1 } *)
+(*   | ty { Ast.PSingle $1 } *)
+
+(* %inline ports: separated_llist(",", port) { $1 } *)
+(* %inline port: name paren(ty) { ($1, $2) } *)
+
+%inline variants: separated_llist(",", variant) { $1 }
+%inline variant: name paren(separated_nonempty_llist(",", ty))? { ($1, $2) }
+
+%inline alias(x): "as" x { $2 }
+
+%inline name: Name { $1 }
+
+%inline binop:
+  | ".." { Ast.BRInc }
+(*   | "..=" { Ast.BRExc } *)
+(*   | "bor" { Ast.BBor } *)
+(*   | "band" { Ast.BBand } *)
+(*   | "bxor" { Ast.BBxor } *)
+(*   | "or" { Ast.BOr } *)
+(*   | "xor" { Ast.BXor } *)
+(*   | "and" { Ast.BAnd } *)
+(*   | "==" { Ast.BEq } *)
+(*   | "!=" { Ast.BNeq } *)
+(*   | "<" { Ast.BLt } *)
+(*   | ">" { Ast.BGt } *)
+(*   | "<=" { Ast.BLeq } *)
+(*   | ">=" { Ast.BGeq } *)
+(*   | "+" { Ast.BAdd } *)
+(*   | "-" { Ast.BSub } *)
+(*   | "%" { Ast.BMod } *)
+(*   | "*" { Ast.BMul } *)
+(*   | "/" { Ast.BDiv } *)
+(*   | "**" { Ast.BPow } *)
+
+%inline unop:
+  | "-" { Ast.UNeg }
+(*   | "not" { Ast.UNot } *)
+
+%inline defname:
+  | name { Ast.DName $1 }
+  | unop { Ast.DUnOp $1 }
+  | binop { Ast.DBinOp $1 }
+
+%inline index: Int { $1 }
+
+%inline path: separated_nonempty_llist("::", name) { $1 }
+
+%inline handler:
+  | arm { [$1] }
+  | brace(separated_llist(",", arm)) { $1 }
+
+expr:
+  | "on" handler %prec STMT { Ast.EOn $2 }
+  | "return" expr? %prec STMT { Ast.EReturn $2 }
+  | "break" expr? %prec STMT { Ast.EBreak $2 }
+  | "continue" %prec STMT { Ast.EContinue }
+  | "fun" params ty_annot? body { Ast.EFunc ($2, $4) }
+  | "task" ":" params body { Ast.ETask ($3) }
+  | expr binop expr { Ast.EBinOp ($2, $1, $3) }
+  | unop expr %prec PREFIX { Ast.UnOp ($1, $2) }
+(*   | expr alias(ty) { Ast.ECast ($1, $2) } *)
+  | expr paren(separated_llist(",", expr)) { Ast.ECall ($1, $2) }
+  | expr "." index { Ast.EProject ($1, $3) }
+  | expr "." name { Ast.EAccess ($1, $3) }
+  | expr brack(expr) { Ast.ESelect ($1, $2) }
+  | expr "." name paren(separated_llist(",", expr)) %prec INVOKE { Ast.EInvoke ($1, $3, $4) }
+(*   | paren(expr) { $1 } *)
+(*   | paren(binop) { Ast.EBinOpRef ($1) } *)
+(*   | block { Ast.EBlock $1 } *)
+(*   | lit { Ast.ELit $1 } *)
+(*   | path qualified_ty_args? { Ast.EPath ($1, $2) } *)
+(*   | "[" separated_llist(",", expr) tail(expr)? "]" { Ast.EArray ($2, $3) } *)
+(*   | "[" expr ";" for_generator ";" separated_llist(";", clause) "]" { Ast.ECompr ($2, $4, $6) } *)
+(*   | tuple(expr) { Ast.ETuple $1 } *)
+(*   | record(expr) { Ast.ERecord $1 } *)
+(*   | "if" expr block else_block? { Ast.EIf ($2, $3, $4) } *)
+(*   | "if" "val" pat "=" expr block else_block? { Ast.EIfVal ($3, $5, $6, $7) } *)
+(*   | "match" expr brace(separated_nonempty_llist(",", arm)) { Ast.EMatch ($2, $3) } *)
+(*   | "loop" block { Ast.ELoop $2 } *)
+(*   | "while" expr block { Ast.EWhile ($2, $3) } *)
+(*   | "while" "val" pat "=" expr block { Ast.EWhileVal ($3, $5, $6) } *)
+(*   | "for" pat "in" expr block { Ast.EFor ($2, $4, $5) } *)
+(*   | "from" separated_nonempty_llist(",", scan) brace(nonempty_llist(step)) { Ast.EFrom ($2, $3) } *)
+  | "_" { Ast.EAnon }
+
+(* %inline scan: pat scankind expr { ($1, $2, $3) } *)
+(* %inline scankind: *)
+(*   | "in" { Ast.ScIn } *)
+(*   | "=" { Ast.ScEq } *)
+(*  *)
+(* %inline step: *)
+(*   | "where" expr *)
+(*     { Ast.SWhere $2 } *)
+(*   | "join" scan join_on? *)
+(*     { Ast.SJoin ($2, $3) } *)
+(*   | "group" separated_nonempty_llist(",", expr) window? reduce? *)
+(*     { Ast.SGroup ($2, $3, $4) } *)
+(*   | "order" separated_nonempty_llist(",", pair(expr, order)) *)
+(*     { Ast.SOrder $2 } *)
+(*   | "yield" expr *)
+(*     { Ast.SYield $2 } *)
+(*  *)
+(* %inline window: "window" window_step? window_duration { ($2, $3) } *)
+(* %inline window_step: "step" expr { $2 } *)
+(* %inline window_duration: "duration" expr { $2 } *)
+(* %inline join_on: "on" expr { $2 } *)
+(* %inline reduce: "reduce" separated_nonempty_llist(",", agg) { $2 } *)
+
+(* %inline order: *)
+(*   | { Ast.OAsc } *)
+(*   | "desc" { Ast.ODesc } *)
+
+(* %inline agg: expr aggof? { ($1, $2) } *)
+(* %inline aggof: "of" expr { $2 } *)
+
+(* %inline qualified_ty_args: "::" ty_args { $2 } *)
+%inline ty_args: brack(separated_nonempty_llist(",", ty)) { $1 }
+%inline tail(x): "|" x { $2 }
+
+(* %inline clause: *)
+(*   | for_generator { let (x0, x1) = $1 in Ast.CFor (x0, x1) } *)
+(*   | guard { Ast.CIf ($1) } *)
+
+(* %inline for_generator: "for" pat "in" expr { ($2, $4) } *)
+(* %inline guard: "if" expr { $2 } *)
+
+%inline else_block: "else" block { $2 }
+
+%inline arm: pat "=>" expr { ($1, $3) }
+
+%inline block: "{" llist(stmt) expr? "}" { ($2, $3) }
+(*  *)
+%inline stmt:
+  | ";"
+    { Ast.SNoop }
+  | expr ";"
+    { Ast.SExpr $1 }
+(*   | "val" param "=" expr ";" *)
+(*     { Ast.SVal ($2, $4) } *)
+(*   | "var" name ty_annot? "=" expr ";" *)
+(*     { Ast.SVar (($2, $3), $5) } *)
+
+pat:
+  | pat "or" pat { $ Ast.POr ($1, $3) }
+  | lit { Ast.PConst $1 }
+  | name { Ast.PVar $1 }
+  | path paren(separated_nonempty_llist(",", pat)) { Ast.PUnwrap ($1, $2) }
+  | tuple(pat) { Ast.PTuple $1 }
+  | record(pat) { Ast.PRecord $1 }
+  | "_" { Ast.PIgnore }
+
+ty:
+  | "fun" paren(separated_llist(",", ty)) ":" ty { Ast.TFunc ($2, $4) }
+  | path ty_args? { Ast.TPath ($1, $2) }
+  | tuple(ty) { Ast.TTuple $1 }
+  | record(ty) { Ast.TRecord $1 }
+  | brack(ty) { Ast.TArray $1 }
+
+%inline tuple(x): "(" x "," separated_llist(",", x) ")"
+  { $2::$4 }
+
+%inline record(x): "#{" separated_llist(",", field(x)) tail(x)? "}"
+  { ($2, $3) }
+
+%inline field(x):
+  | name ":" x
+    { ($1, Some $3) }
+  | name
+    { ($1, None) }
+
+%inline lit:
+  | Bool { Ast.LBool $1 }
+  | Char { Ast.LChar $1 }
+  | Int { Ast.LInt ($1, None) }
+  | Float { Ast.LFloat ($1, None) }
+  | "unit" { Ast.LUnit }
+  | String { Ast.LString $1 }
