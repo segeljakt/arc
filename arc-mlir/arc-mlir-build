@@ -33,6 +33,9 @@ LLVM_SRC_DIR="$A2M/llvm-project"
 LLVM_BUILD_DIR="$A2M_BUILD/llvm-build/"
 LLVM_INSTALL_DIR="$A2M_BUILD/llvm-install"
 
+ARC_LANG_SRC_DIR="${A2M}/../arc-lang/"
+ARC_LANG_BUILD_DIR="${A2M_BUILD}/arc-lang/"
+
 # default to a debug build
 BUILD_FLAVOUR="${BUILD_FLAVOUR:-Debug}"
 
@@ -48,6 +51,15 @@ echo "Will build a $BUILD_FLAVOUR build"
 function fail {
     echo "Failure: $*"
     exit 1
+}
+
+function dune-build {
+    mkdir -p $LLVM_BUILD_DIR/bin || fail "creating $LLVM_BUILD_DIR/bin"
+    dune build \
+      --root $ARC_LANG_SRC_DIR \
+      --build-dir $ARC_LANG_BUILD_DIR \
+      src/main.exe
+    mv $ARC_LANG_BUILD_DIR/default/src/main.exe $LLVM_BUILD_DIR/bin/arc-lang
 }
 
 function llvm-cmake {
@@ -80,6 +92,7 @@ function llvm-cmake {
 }
 
 function llvm-build {
+    dune-build || fail "building dune"
     cmake --build $LLVM_BUILD_DIR || fail "building LLVM"
 }
 
