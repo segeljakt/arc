@@ -29,10 +29,14 @@ syn keyword arcOperator band
 syn keyword arcOperator bor
 syn keyword arcOperator bxor
 syn keyword arcOperator is
+syn keyword arcOperator not
+syn keyword arcOperator in
 hi def link arcOperator Operator
 "=============================================================================
 " Statements
 "=============================================================================
+syn keyword arcStatement class
+syn keyword arcStatement instance
 syn keyword arcStatement def
 syn keyword arcStatement task
 syn keyword arcStatement on
@@ -47,9 +51,6 @@ hi def link arcConditional Conditional
 "=============================================================================
 " Reserved Keywords
 "=============================================================================
-syn keyword arcStatement not
-syn keyword arcStatement in
-syn keyword arcStatement is
 syn keyword arcStatement fun
 hi def link arcKeyword Keyword
 "=============================================================================
@@ -77,5 +78,5 @@ hi def link arcConstant Constant
 "=============================================================================
 " Comments
 "=============================================================================
-syn match arcComment "#.*"
+syn match arcComment "#[^{].*"
 hi def link arcComment Comment
