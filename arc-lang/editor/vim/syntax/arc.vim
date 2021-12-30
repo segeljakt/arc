@@ -29,6 +29,8 @@ syn keyword arcOperator band
 syn keyword arcOperator bor
 syn keyword arcOperator bxor
 syn keyword arcOperator is
+syn keyword arcOperator not
+syn keyword arcOperator in
 hi def link arcOperator Operator
 "=============================================================================
 " Statements
@@ -47,9 +49,6 @@ hi def link arcConditional Conditional
 "=============================================================================
 " Reserved Keywords
 "=============================================================================
-syn keyword arcStatement not
-syn keyword arcStatement in
-syn keyword arcStatement is
 syn keyword arcStatement fun
 hi def link arcKeyword Keyword
 "=============================================================================
