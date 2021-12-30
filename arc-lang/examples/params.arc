@@ -2,8 +2,5 @@
 # RUN: arc-lang %s | arc-mlir-rust-test %t-canon - -rustinclude %s.rust-tests -canonicalize
 
 # ANCHOR: example
-def add(a: i32, b: i32): i32;
-
-def add(a, b) = a + b
+def test(typed_param: i32, untyped_param) = typed_param + untyped_param
 # ANCHOR_END: example
-

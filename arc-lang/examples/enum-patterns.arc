@@ -2,5 +2,14 @@
 # RUN: arc-lang %s | arc-mlir-rust-test %t-canon - -rustinclude %s.rust-tests -canonicalize
 
 def test() {
-  1+2
+# ANCHOR: example
+# Pattern matching on enums
+val a = Some(3);
+
+match a {
+    Some(2) => 2,
+    Some(x) => x,
+    None => 0
+};
+# ANCHOR_END: example
 }

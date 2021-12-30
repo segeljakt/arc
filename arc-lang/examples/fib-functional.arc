@@ -2,8 +2,11 @@
 # RUN: arc-lang %s | arc-mlir-rust-test %t-canon - -rustinclude %s.rust-tests -canonicalize
 
 # ANCHOR: example
-def add(a: i32, b: i32): i32;
+# The following code shows how to define the Fibonacci function functionally.
 
-def add(a, b) = a + b
+def fib(n) = match n {
+    0 => 0,
+    1 => 1,
+    n => fib(n-2) + fib(n-1)
+}
 # ANCHOR_END: example
-

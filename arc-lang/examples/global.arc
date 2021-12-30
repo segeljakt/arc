@@ -2,8 +2,9 @@
 # RUN: arc-lang %s | arc-mlir-rust-test %t-canon - -rustinclude %s.rust-tests -canonicalize
 
 # ANCHOR: example
-def add(a: i32, b: i32): i32;
+val pi = 3.14;
 
-def add(a, b) = a + b
+def test() {
+    val x = pi * 2.0;
+}
 # ANCHOR_END: example
-

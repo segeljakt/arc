@@ -2,8 +2,13 @@
 # RUN: arc-lang %s | arc-mlir-rust-test %t-canon - -rustinclude %s.rust-tests -canonicalize
 
 # ANCHOR: example
-def add(a: i32, b: i32): i32;
+mod foo {
+    mod bar {
+        mod baz {
+            def qux() = 3
+        }
+    }
+}
 
-def add(a, b) = a + b
+def zot() = foo::bar::baz::qux()
 # ANCHOR_END: example
-

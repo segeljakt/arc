@@ -2,8 +2,7 @@
 # RUN: arc-lang %s | arc-mlir-rust-test %t-canon - -rustinclude %s.rust-tests -canonicalize
 
 # ANCHOR: example
-def add(a: i32, b: i32): i32;
-
-def add(a, b) = a + b
+def this_is_a_name(this_is_also_a_name) {
+    val this_is_yet_another_name = 1;
+}
 # ANCHOR_END: example
-
