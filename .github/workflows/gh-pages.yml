@@ -19,8 +19,10 @@ jobs:
       - name: Install mdbook-linkcheck
         run: cargo install mdbook-linkcheck
 
-      - name: Build custom mdbook preprocessor
-        run: cargo build -C arc-website/format/Cargo.toml
+      - name: Build custom mdbook preprocessors
+        run:
+          | cargo build -C arc-website/grammar/Cargo.toml
+          | cargo build -C arc-website/syntax/Cargo.toml
 
       - name: Build documentation
         run: mdbook build arc-website/ --dest-dir arc-website/docs
