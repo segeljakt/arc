@@ -1,5 +1,7 @@
+# ANCHOR: unit
 @{intrinsic: "none"}
 extern type unit;
+# ANCHOR_END: unit
 
 @{intrinsic: "si8"}
 extern type i8;
@@ -105,22 +107,26 @@ extern type char;
 
 # ------------------------------------------------------
 
+# ANCHOR: string
 extern type String;
 
 extern def concat(String, String): String;
+# ANCHOR_END: string
 
 # ------------------------------------------------------
 
-extern type Option[T];
-extern def is_some[T](Option[T]): bool;
-extern def is_none[T](Option[T]): bool;
-extern def unwrap[T](Option[T]): T;
-extern def unwrap_or[T](Option[T], T): T;
-extern def unwrap_or_else[T](Option[T], fun():T): T;
+# ANCHOR: option
+enum Option[T] {
+    Some(T),
+    None,
+}
+# ANCHOR_END: option
 
 # ------------------------------------------------------
 
+# ANCHOR: array
 extern type Array[T];
+# ANCHOR_END: array
 
 extern def new_array[T](T): Array[T];
 extern def push_array[T](Array[T], T): unit;
