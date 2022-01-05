@@ -25,3 +25,5 @@ Task ::= "task" [Name] [Generics]? [Params] ":" [Params] [Block]
 ```text
 {{#include ../../../arc-lang/examples/task-merge.arc:example}}
 ```
+
+### Multi-Output Tasks
