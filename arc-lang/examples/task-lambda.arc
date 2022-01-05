@@ -3,6 +3,8 @@
 
 # ANCHOR: example
 def test(i) {
-    task: (o) = loop { on x in i => o ! x }
+    task: (o) = loop {
+        on x in i => o ! x
+    }
 }
 # ANCHOR_END: example

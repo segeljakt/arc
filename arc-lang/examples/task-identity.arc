@@ -4,7 +4,7 @@
 # ANCHOR: example
 task identity(source): (sink) {
     loop {
-        on event in source => sink emit event;
+        on event in source => sink ! event;
     }
 }
 # ANCHOR_END: example
