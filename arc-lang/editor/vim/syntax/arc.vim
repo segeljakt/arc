@@ -35,6 +35,8 @@ hi def link arcOperator Operator
 "=============================================================================
 " Statements
 "=============================================================================
+syn keyword arcStatement class
+syn keyword arcStatement instance
 syn keyword arcStatement def
 syn keyword arcStatement task
 syn keyword arcStatement on
@@ -76,5 +78,5 @@ hi def link arcConstant Constant
 "=============================================================================
 " Comments
 "=============================================================================
-syn match arcComment "#.*"
+syn match arcComment "#[^{].*"
 hi def link arcComment Comment
