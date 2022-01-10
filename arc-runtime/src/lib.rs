@@ -1,41 +1,40 @@
-#![feature(fn_traits)]
-#![feature(unboxed_closures)]
-#![feature(arbitrary_self_types)]
-#![feature(async_closure)]
+// #![feature(fn_traits)]
+// #![feature(unboxed_closures)]
+// #![feature(arbitrary_self_types)]
+// #![feature(async_closure)]
+// #![feature(async_stream)]
+// #![feature(stream_from_iter)]
+#![feature(try_trait_v2)]
 #![allow(unused)]
 #![allow(clippy::type_complexity)]
 
 pub mod client;
 pub mod control;
-pub mod epochs;
+pub mod data;
 pub mod executor;
-pub mod loops;
-pub mod pipeline;
-pub mod port;
-pub mod sink;
-pub mod source;
-pub mod stream;
-pub mod task;
-pub mod timer;
-pub mod transform;
-pub mod state;
-pub mod channel;
+pub mod channels {
+    pub mod remote {
+        pub mod broadcast;
+        pub mod concurrent;
+    }
+    pub mod local {
+        pub mod broadcast;
+        pub mod concurrent;
+    }
+}
+pub mod gc;
 pub mod datagen;
+pub mod system;
 
 pub mod prelude {
+    pub use crate::channels;
     pub use crate::client::*;
-    pub use crate::epochs::*;
-    pub use crate::executor::*;
-    pub use crate::loops::*;
-    pub use crate::pipeline::*;
-    pub use crate::port::*;
-    pub use crate::sink::*;
-    pub use crate::source::*;
-    pub use crate::stream::*;
-    pub use crate::transform::*;
-    pub use crate::state::*;
-    pub use crate::task::*;
+    pub use crate::control::*;
+    pub use crate::data::*;
     pub use crate::datagen::*;
+    pub use crate::executor::*;
+    pub use crate::system::*;
+    pub use crate::gc::*;
     pub use kompact::prelude::*;
     pub use std::any::Any;
     pub use std::any::TypeId;

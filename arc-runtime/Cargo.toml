@@ -20,3 +20,8 @@ hierarchical_hash_wheel_timer = { version = "1.0.0" }
 uuid                          = { version = "0.8.2" }
 rand                          = { version = "0.8.3" }
 dyn-clone                     = { version = "1.0.4" }
+lazy_static                   = { version = "1.4.0" }
+async-recursion               = { version = "0.3.2" }
+comet                         = { git = "https://github.com/Starlight-JS/comet", branch = "multi-threaded", package = "comet-multi" }
+crossfire                     = { version = "0.1.7" }
+tokio                         = { version = "1.15.0", features = ["sync"] }

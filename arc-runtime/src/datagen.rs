@@ -1,12 +1,12 @@
 #![allow(deprecated)]
 #![allow(dead_code)]
 
-use crate::port::DataReqs;
-use crate::port::DateTime;
+use crate::data::Data;
+use crate::data::DateTime;
 
-use rand::Rng;
-use rand::distributions::Standard;
 use rand::distributions::Distribution;
+use rand::distributions::Standard;
+use rand::Rng;
 
 use std::marker::PhantomData;
 
@@ -28,7 +28,7 @@ impl<T> DataGen<T> {
     }
 }
 
-impl<T: DataReqs> Iterator for DataGen<T>
+impl<T: Data> Iterator for DataGen<T>
 where
     Standard: Distribution<T>,
 {
@@ -38,7 +38,7 @@ where
         self.offset += 1;
         self.count -= 1;
         if self.count > 0 {
-            Some((DateTime::from_unix_timestamp(self.offset), self.rng.gen::<T>()))
+            Some((DateTime::from_unix_timestamp(self.offset), self.rng.gen()))
         } else {
             None
         }
