@@ -1,0 +1,78 @@
+use crate::context::Context;
+use crate::data::DynSharable;
+use comet::api::Collectable;
+use comet::api::Finalize;
+use comet::api::Trace;
+use std::fmt::Debug;
+use std::ptr::NonNull;
+
+#[macro_export]
+macro_rules! declare_functions {
+    ($($id:ident),*) => {
+        #[derive(Send, Sync, Unpin, Collectable, Finalize, NoTrace)]
+        pub struct Function<I: 'static, O: 'static> {
+            pub ptr: fn(I, &mut Context) -> O,
+            pub tag: FunctionTag<I, O>,
+        }
+        impl<I, O> Clone for Function<I, O> {
+            fn clone(&self) -> Self {
+                Self { ptr: self.ptr.clone(), tag: self.tag.clone() }
+            }
+        }
+        #[derive(Debug, Copy, Send, Sync, Unpin)]
+        pub struct FunctionTag<I, O>(Tag, std::marker::PhantomData<(I, O)>);
+        impl<I, O> std::fmt::Debug for Function<I, O> {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                Ok(())
+            }
+        }
+        impl<I, O> Clone for FunctionTag<I, O> {
+            fn clone(&self) -> Self {
+                Self(self.0, std::marker::PhantomData)
+            }
+        }
+        #[derive(Debug, Clone, Copy, Send)]
+        #[allow(non_camel_case_types)]
+        pub enum Tag {
+            $($id,)*
+        }
+        impl<I, O> DynSharable for Function<I, O> {
+            type T = FunctionTag<I, O>;
+            fn into_sendable(&self, ctx: &mut Context) -> Self::T {
+                self.tag.clone()
+            }
+        }
+        impl<I: 'static, O: 'static> DynSendable for FunctionTag<I, O> {
+            type T = Function<I, O>;
+            fn into_sharable(&self, ctx: &mut Context) -> Self::T {
+                unsafe {
+                    match self.0 {
+                        $(Tag::$id => Function {
+                            ptr: std::mem::transmute($id as usize),
+                            tag: self.clone()
+                        }),*
+                    }
+                }
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! function {
+    // Create a function value
+    ($fun:ident) => {
+        Function {
+            ptr: $fun,
+            tag: FunctionTag(Tag::$fun, std::marker::PhantomData),
+        }
+    };
+    // Create a function type
+    (($($input:ty),*) -> $output:ty) => {
+        Function<($($input,)*), $output>
+    };
+}
+
+pub fn empty_env() -> NonNull<()> {
+    NonNull::from(&())
+}

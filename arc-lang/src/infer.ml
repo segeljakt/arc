@@ -311,11 +311,11 @@ and tvs t =
   tvs_of_t t NameSet.empty |> NameSet.elements
 
 and mgus ts0 ts1 s (ctx:Ctx.t) =
-  Printf.printf "\n[";
-  Pretty_hir.pr_types ts0 Pretty.Ctx.brief;
-  Printf.printf "] == [";
-  Pretty_hir.pr_types ts1 Pretty.Ctx.brief;
-  Printf.printf "]\n";
+(*   Printf.printf "\n["; *)
+(*   Pretty_hir.pr_types ts0 Pretty.Ctx.brief; *)
+(*   Printf.printf "] == ["; *)
+(*   Pretty_hir.pr_types ts1 Pretty.Ctx.brief; *)
+(*   Printf.printf "]\n"; *)
   if ts0 <> [] && ts1 <> [] then
     zip ts0 ts1 |> foldl (fun (s0, ctx) (t0, t1) ->
       let (s1, ctx) = ctx |> mgu (apply s0 t0) (apply s0 t1) in
