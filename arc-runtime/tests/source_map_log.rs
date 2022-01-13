@@ -83,7 +83,7 @@ macro_rules! compile_test {
             async fn run(mut self: ComponentDefinitionAccess<Self>) -> Control<()> {
                 loop {
                     let data = self.pullable.pull().await?;
-                    info!(self.log(), "{:?}", data);
+                    info!(self.log(), "Logging {:?}", data);
                 }
             }
         }
@@ -127,9 +127,9 @@ macro_rules! compile_test {
             T: Data,
             <I as IntoIterator>::IntoIter: Data,
         {
-            let (a0, a1) = $($mod)::+::channel(&EXECUTOR);
-            EXECUTOR.create_task(move || Source::new(i, a0));
-            a1
+            let (o0, o1) = $($mod)::+::channel(&EXECUTOR);
+            EXECUTOR.create_task(move || Source::new(i, o0));
+            o1
         }
 
         fn map<A, B>(a: $($mod)::+::Pullable<A>, f: fn(A) -> B) -> $($mod)::+::Pullable<B>
@@ -155,9 +155,13 @@ macro_rules! compile_test {
 
         #[test]
         fn main() {
-            let s = source(0..100);
-            let s = map(s, plus_one);
-            let _ = log(s);
+            EXECUTOR.init(KompactConfig::default().build().unwrap());
+            {
+                let s = source(0..100);
+                let s = map(s, plus_one);
+                let _ = log(s);
+            }
+            EXECUTOR.await_termination();
         }
     }
 }
@@ -165,15 +169,15 @@ macro_rules! compile_test {
 mod test1 {
     compile_test!(arc_runtime::channels::remote::concurrent);
 }
-
-mod test2 {
-    compile_test!(arc_runtime::channels::remote::broadcast);
-}
-
-mod test3 {
-    compile_test!(arc_runtime::channels::local::concurrent);
-}
-
-mod test4 {
-    compile_test!(arc_runtime::channels::local::broadcast);
-}
+//
+// mod test2 {
+//     compile_test!(arc_runtime::channels::remote::broadcast);
+// }
+//
+// mod test3 {
+//     compile_test!(arc_runtime::channels::local::concurrent);
+// }
+//
+// mod test4 {
+//     compile_test!(arc_runtime::channels::local::broadcast);
+// }

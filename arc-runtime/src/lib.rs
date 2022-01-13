@@ -41,6 +41,7 @@ pub mod prelude {
     pub use crate::data::Key;
     pub use crate::executor::Executor;
 
+    pub use kompact::prelude::info;
     pub use kompact::prelude::warn;
     pub use kompact::prelude::Actor;
     pub use kompact::prelude::ActorRaw;
@@ -50,11 +51,12 @@ pub mod prelude {
     pub use kompact::prelude::ComponentDefinitionAccess;
     pub use kompact::prelude::ComponentLifecycle;
     pub use kompact::prelude::ComponentLogging;
+    pub use kompact::prelude::DeadletterBox;
     pub use kompact::prelude::DynamicPortAccess;
     pub use kompact::prelude::ExecuteResult;
     pub use kompact::prelude::Handled;
     pub use kompact::prelude::KompactConfig;
     pub use kompact::prelude::MsgEnvelope;
+    pub use kompact::prelude::NetworkConfig;
     pub use kompact::prelude::Never;
-    pub use kompact::prelude::info;
 }

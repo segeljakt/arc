@@ -40,7 +40,6 @@ mod test {
         letroot!(l = stack, mutator.allocate(List::Nil, AllocationSpace::New));
 
         for i in 0..100 {
-            println!("{}", i);
             *l = mutator.allocate(List::Cons(i, *l), AllocationSpace::New);
         }
 
