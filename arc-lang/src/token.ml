@@ -1,17 +1,13 @@
 type token =
   | ParenL
   | ParenR
-  | ParenLR
   | BrackL
   | BrackR
-  | BrackLR
   | PoundBraceL
   | BraceL
   | BraceR
-  | BraceLR
   | AngleL
   | AngleR
-  | AngleLR
 (*= Operators ==============================================================*)
   | Bang
   | Neq
@@ -36,26 +32,20 @@ type token =
   | AtSign
   | Underscore
   | Bar
-  | BarBar
-  | Ampersand
 (*= Keywords ================================================================*)
-  | After
   | And
   | As
   | Break
   | Band
   | Bor
   | Bxor
-  | By
   | Class
   | Continue
   | Def
   | Desc
   | Duration
   | Else
-  | Emit
   | Enum
-  | Every
   | Extern
   | For
   | From
@@ -64,9 +54,7 @@ type token =
   | If
   | In
   | Instance
-  | Is
   | Join
-  | Let
   | Loop
   | Match
   | Mod
@@ -85,8 +73,6 @@ type token =
   | Where
   | Window
   | While
-  | Unwrap
-  | Enwrap
   | Use
   | Xor
   | Yield
@@ -98,17 +84,17 @@ type token =
   | Char of char
   | String of string
   | Unit
-  | DurationNs of int
-  | DurationUs of int
-  | DurationMs of int
-  | DurationS of int
-  | DurationM of int
-  | DurationH of int
-  | DurationD of int
-  | DurationW of int
+(*   | DurationNs of int *)
+(*   | DurationUs of int *)
+(*   | DurationMs of int *)
+(*   | DurationS of int *)
+(*   | DurationM of int *)
+(*   | DurationH of int *)
+(*   | DurationD of int *)
+(*   | DurationW of int *)
 (*     LitDurationMo, *)
 (*     LitDurationY, *)
-  | Date of string
-  | DateTime of string
-  | DateTimeZone of string
+(*   | Date of string *)
+(*   | DateTime of string *)
+(*   | DateTimeZone of string *)
   | Eof

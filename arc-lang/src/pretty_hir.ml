@@ -182,9 +182,13 @@ and pr_expr e ctx =
       pr_var v ctx;
       pr " as ";
       pr_type t ctx;
-  | EEmit v ->
-      pr "emit ";
+  | EReceive v ->
+      pr "receive ";
       pr_var v ctx;
+  | EEmit (v0, v1) ->
+      pr_var v0 ctx;
+      pr " ! ";
+      pr_var v1 ctx;
   | EEnwrap (xs, ts, v) ->
       pr "enwrap[";
       pr_path xs ctx;
@@ -217,8 +221,7 @@ and pr_expr e ctx =
   | ELoop b ->
       pr "loop ";
       pr_block b ctx;
-  | EReceive ->
-      pr "receive";
+  | EOn _ -> todo ()
   | ERecord fvs ->
       pr "#";
       pr_brace (pr_list (pr_field pr_var) fvs) ctx;

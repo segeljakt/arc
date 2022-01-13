@@ -118,7 +118,7 @@ extern def concat(String, String): String;
 # ANCHOR: option
 enum Option[T] {
     Some(T),
-    None,
+    None
 }
 # ANCHOR_END: option
 
@@ -128,20 +128,21 @@ enum Option[T] {
 extern type Array[T];
 # ANCHOR_END: array
 
-extern def new_array[T](T): Array[T];
-extern def push_array[T](Array[T], T): unit;
-extern def pop_array[T](Array[T]): unit;
-extern def select_array[T](Array[T], i32): T;
-extern def len_array[T](Array[T]): i32;
-extern def extend_array[T](Array[T], Array[T]): unit;
+extern def array[T](): Array[T];
+extern def push[T](Array[T], T);
+extern def pop[T](Array[T]);
+extern def select[T](Array[T], i32): T;
+extern def len[T](Array[T]): i32;
+extern def extend[T](Array[T], Array[T]);
+extern def contains[T](T, Array[T]): bool;
 
 # ------------------------------------------------------
 
 extern type Cell[T];
 
-extern def new_cell[T](T): Cell[T];
-extern def update_cell[T](Cell[T], T): unit;
-extern def read_cell[T](Cell[T]): T;
+extern def cell[T](T): Cell[T];
+extern def update[T](Cell[T], T);
+extern def read[T](Cell[T]): T;
 
 # ------------------------------------------------------
 

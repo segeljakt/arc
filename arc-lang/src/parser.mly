@@ -38,13 +38,17 @@ separated_nonempty_llist_rev(s, x):
   | epsilon { [] }
   | separated_nonempty_llist(s, x) { $1 }
 
+%inline separated_llist_trailing(s, x):
+  | epsilon { [] }
+  | separated_nonempty_llist(s, x) s? { $1 }
+
 (* The grammar *)
 
-%inline decorator: "@" brace(separated_nonempty_llist(Comma, field(lit))) { $2 }
+%inline decorator: "@" brace(separated_llist_trailing(",", field(lit))) { $2 }
 
 %inline items: llist(item) { $1 }
 %inline item:
-  | loption(decorator) "extern" "def" defname loption(generics) paren(tys) annot(ty0)? ";"
+  | loption(decorator) "extern" "def" defname loption(generics) paren(typarams) annot(ty0)? ";"
     { Ast.IExternDef ($1, $4, $5, $6, $7) }
   | loption(decorator) "type" name loption(generics) "=" ty0 ";"
     { Ast.ITypeAlias ($1, $3, $4, $6) }
@@ -67,6 +71,8 @@ separated_nonempty_llist_rev(s, x):
   | loption(decorator) "val" name annot(ty0)? "=" expr0 ";"
     { Ast.IVal ($1, $3, $4, $6) }
 
+%inline typarams: separated_llist(",", ty0) { $1 }
+
 %inline decls: llist(decl) { $1 }
 %inline decl: "def" name loption(generics) params annot(ty0)?
   { ($2, $3, $4, $5) }
@@ -81,13 +87,13 @@ separated_nonempty_llist_rev(s, x):
 
 %inline annot(x): ":" x { $2 }
 
-%inline params: paren(separated_llist(",", param)) { $1 }
+%inline params: paren(separated_llist_trailing(",", param)) { $1 }
 %inline param: pat0 annot(ty0)? { ($1, $2) }
 
-%inline generics: brack(separated_llist(",", generic)) { $1 }
+%inline generics: brack(separated_llist_trailing(",", generic)) { $1 }
 %inline generic: Name { $1 }
 
-%inline variants: separated_llist(",", variant) { $1 }
+%inline variants: separated_llist_trailing(",", variant) { $1 }
 %inline variant: name loption(paren(tys)) { ($1, $2) }
 
 %inline alias(x): "as" x { $2 }
@@ -150,9 +156,10 @@ expr1:
 %inline op2:
   | "=" { Ast.BMut }
   | "in" { Ast.BIn }
-  | "!" { Ast.BEmit }
+  | "not" "in" { Ast.BNotIn }
 expr2:
   | expr3 { $1 }
+  | expr2 "!" expr3 { Ast.EEmit ($1, $3) }
   | expr2 op2 expr3 { Ast.EBinOp ($2, $1, $3)}
 
 %inline op3:
@@ -228,7 +235,7 @@ expr11:
 
 expr13:
   | expr15 { $1 }
-  | expr15 paren(separated_llist(",", expr1))
+  | expr15 paren(separated_llist_trailing(",", expr1))
     { Ast.ECall ($1, $2) }
 
 expr14:
@@ -238,7 +245,7 @@ expr14:
     { Ast.EAccess ($1, $3) }
   | expr12 brack(expr1)
     { Ast.ESelect ($1, $2) }
-  | expr12 "." name paren(separated_llist(",", expr1))
+  | expr12 "." name paren(separated_llist_trailing(",", expr1))
     { Ast.EInvoke ($1, $3, $4) }
 
 %inline expr15:
@@ -252,7 +259,7 @@ expr14:
     { Ast.ELit $1 }
   | path loption(qualify(brack(tys)))
     { Ast.EPath ($1, $2) }
-  | "[" separated_llist(",", expr0) tail(expr0)? "]"
+  | "[" separated_llist_trailing(",", expr0) tail(expr0)? "]"
     { Ast.EArray ($2, $3) }
   | "[" expr0 ";" for_generator ";" separated_llist(";", clause) "]"
     { Ast.ECompr ($2, $4, $6) }
@@ -373,13 +380,13 @@ ty1:
   | brack(ty0)
     { Ast.TArray $1 }
 
-%inline tuple(x): "(" x "," separated_llist(",", x) ")"
+%inline tuple(x): "(" x "," separated_llist_trailing(",", x) ")"
   { $2::$4 }
 
 %inline record(x): "#{" fields(x) tail(x)? "}"
   { ($2, $3) }
 
-%inline fields(x): separated_llist(",", field(x)) { $1 }
+%inline fields(x): separated_llist_trailing(",", field(x)) { $1 }
 %inline field(x):
   | name ":" x
     { ($1, Some $3) }

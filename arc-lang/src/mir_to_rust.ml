@@ -144,16 +144,19 @@ and pr_expr e ctx =
       pr_var v ctx;
       pr " as ";
       pr_type t ctx;
-  | EEmit v ->
-      pr "emit ";
+  | EEmit (v0, v1) ->
+      pr_var v0 ctx;
+      pr ".push";
+      pr_paren (pr_var v1) ctx;
+      pr ".await?"
+  | EReceive v ->
       pr_var v ctx;
+      pr "pull().await?";
   | EEnwrap (xs, ts, v) ->
       pr "enwrap[";
       pr_path (xs, ts) ctx;
       if ts != [] then begin
-        pr "[";
-        pr_list pr_type ts ctx;
-        pr "]";
+        pr_brack (pr_list pr_type ts) ctx;
       end;
       pr "]";
       pr_paren (pr_var v) ctx;
@@ -165,33 +168,27 @@ and pr_expr e ctx =
       pr " else ";
       pr_block b1 ctx;
   | EIs (xs, ts, v) ->
-      pr "is[";
+      pr "is!(";
       pr_path (xs, ts) ctx;
       if ts != [] then begin
-        pr "[";
-        pr_list pr_type ts ctx;
-        pr "]";
+        pr_brack (pr_list pr_type ts) ctx;
       end;
-      pr "]";
+      pr ")";
       pr_paren (pr_var v) ctx;
   | ELit l ->
       pr_lit l ctx;
   | ELoop b ->
       pr "loop ";
       pr_block b ctx;
-  | EReceive ->
-      pr "receive";
   | ERecord fvs ->
-      pr "%%{";
+      pr "#{";
       pr_list pr_expr_field fvs ctx;
       pr "}";
   | EUnwrap (xs, ts, v) ->
       pr "unwrap[";
       pr_path (xs, ts) ctx;
       if ts != [] then begin
-        pr "[";
-        pr_list pr_type ts ctx;
-        pr "]";
+        pr_brack (pr_list pr_type ts) ctx;
       end;
       pr "]";
       pr_paren (pr_var v) ctx;

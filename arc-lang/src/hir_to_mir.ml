@@ -78,8 +78,8 @@ and lower_expr (e:Hir.expr) (ctx:Ctx.t) =
   | Hir.ECast (v, t) ->
       let (t, ctx) = lower_type t ctx in
       (Mir.ECast (v, t), ctx)
-  | Hir.EEmit v ->
-      (Mir.EEmit v, ctx)
+  | Hir.EEmit (v0, v1) ->
+      (Mir.EEmit (v0, v1), ctx)
   | Hir.EEnwrap (xs, ts, v) ->
       let (ts, ctx) = lower_types ts ctx in
       (Mir.EEnwrap (xs, ts, v), ctx)
@@ -95,7 +95,8 @@ and lower_expr (e:Hir.expr) (ctx:Ctx.t) =
   | Hir.ELoop b ->
       let (b, ctx) = lower_block b ctx in
       (Mir.ELoop b, ctx)
-  | Hir.EReceive -> (Mir.EReceive, ctx)
+  | Hir.EReceive v -> (Mir.EReceive v, ctx)
+  | Hir.EOn _ -> todo ()
   | Hir.ERecord fvs -> (Mir.ERecord (fvs |> sort_expr_fields), ctx)
   | Hir.EUnwrap (xs, ts, v) ->
       let (ts, ctx) = lower_types ts ctx in

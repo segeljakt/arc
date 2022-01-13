@@ -235,8 +235,8 @@ and lower_expr t e ctx =
   | Mir.ECall (v0, vs) ->
       (Mlir.ECall (arg v0, args vs), ctx)
   | Mir.ECast _ -> todo ()
-  | Mir.EEmit v0 ->
-      (Mlir.EEmit (ctx |> Ctx.get_output_handle, (arg v0)), ctx)
+  | Mir.EEmit (v0, v1) ->
+      (Mlir.EEmit ((arg v0), (arg v1)), ctx)
   | Mir.EEnwrap (xs, ts, v0) ->
       let (x, ctx) = lower_path (xs, ts) ctx in
       (Mlir.EEnwrap (x, arg_opt v0), ctx)
@@ -268,8 +268,8 @@ and lower_expr t e ctx =
       let terminator _ = Mlir.EYield in
       let (b, ctx) = lower_block b terminator ctx in
       (Mlir.ELoop b, ctx)
-  | Mir.EReceive ->
-      (Mlir.EReceive (ctx |> Ctx.get_input_handle), ctx)
+  | Mir.EReceive v ->
+      (Mlir.EReceive (arg v), ctx)
   | Mir.ERecord fvs ->
       let (fvs, ctx) = fvs |> mapm_filter lower_field_expr ctx in
       let (xs, ts) = fvs |> map (fun (_, v) -> v) |> Utils.unzip in

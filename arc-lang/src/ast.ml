@@ -86,7 +86,6 @@ and binop =
   | BRInc
   | BBy
   | BNotIn
-  | BEmit
 
 and unop =
   | UNeg
@@ -133,6 +132,8 @@ and expr =
   | EIfVal    of pattern * expr * block * block option
   | EInvoke   of expr * name * exprs
   | EMatch    of expr * arms
+  | EReceive  of expr
+  | EEmit     of expr * expr
   | EOn       of receivers
   | EPath     of path * tys
   | EProject  of expr * index
@@ -199,14 +200,13 @@ and binop_name op =
   | BPow -> "pow"
   | BSub -> "sub"
   | BXor -> "xor"
-  | BIn -> "in"
+  | BIn -> "contains"
+  | BNotIn -> "not_contains"
   | BRExc -> "rexc"
   | BRInc -> "rinc"
   | BEq -> "eq"
   | BMut -> "mut"
   | BBy -> "by"
-  | BNotIn -> "notin"
-  | BEmit -> "emit"
 
 and def_name d =
   match d with

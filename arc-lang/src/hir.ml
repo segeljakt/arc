@@ -47,13 +47,13 @@ and expr =
   | EEq       of var * var
   | ECall     of var * vars
   | ECast     of var * ty
-  | EEmit     of var
   | EEnwrap   of path * tys * var
   | EIf       of var * block * block
   | EIs       of path * tys * var
   | ELit      of Ast.lit
   | ELoop     of block
-  | EReceive
+  | EEmit     of var * var
+  | EReceive  of var
   | EOn       of receivers
   | ERecord   of var fields
   | EUnwrap   of path * tys * var
@@ -201,13 +201,13 @@ and free_vars ps b =
     | EEq (v0, v1) -> ctx |> fv_var v0 |> fv_var v1
     | ECall (v, vs) -> ctx |> fv_var v |> fv_vars vs
     | ECast (v, _) -> ctx |> fv_var v
-    | EEmit v -> ctx |> fv_var v
+    | EEmit (v0, v1) -> ctx |> fv_var v0 |> fv_var v1
     | EEnwrap (_, _, v) -> ctx |> fv_var v
     | EIf (v, b0, b1) -> ctx |> fv_var v |> fv_block b0 |> fv_block b1
     | EIs (_, _, v) -> ctx |> fv_var v
     | ELit _ -> ctx
     | ELoop b -> ctx |> fv_block b
-    | EReceive -> ctx
+    | EReceive v -> ctx |> fv_var v
     | EOn rs -> rs |> foldl fv_receiver ctx
     | ERecord vfs -> vfs |> foldl (fun ctx (_, v) -> ctx |> fv_var v) ctx
     | EUnwrap (_, _, v) -> ctx |> fv_var v

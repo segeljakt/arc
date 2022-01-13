@@ -36,13 +36,13 @@ and expr =
   | EEq       of var * var
   | ECall     of var * vars
   | ECast     of var * ty
-  | EEmit     of var
+  | EEmit     of var * var
   | EEnwrap   of path * tys * var
   | EIf       of var * block * block
   | EIs       of path * tys * var
   | ELit      of Ast.lit
   | ELoop     of block
-  | EReceive
+  | EReceive  of var
   | ERecord   of var fields
   | EUnwrap   of path * tys * var
   | EReturn   of var

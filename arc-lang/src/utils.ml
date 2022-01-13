@@ -55,8 +55,8 @@ let zip_with_from f l0_init l1_init acc =
     | [], [] ->
         acc
     | _, _ -> panic (Printf.sprintf "Zip failed, lists of different length %d and %d"
-        (l0 |> List.length)
-        (l1 |> List.length)
+        (l0_init |> List.length)
+        (l1_init |> List.length)
     )
   in
   zip l0_init l1_init acc

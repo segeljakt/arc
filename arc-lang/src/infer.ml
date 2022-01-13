@@ -88,16 +88,6 @@ module Ctx = struct
     | CDef t -> t
     | _ -> panic "Tried to return outside of function"
 
-  and input_event_ty ctx =
-    match hd ctx.subctx with
-    | CTask (t, _) -> t
-    | _ -> panic "Tried to poll event outside of function"
-
-  and output_event_ty ctx =
-    match hd ctx.subctx with
-    | CTask (_, t) -> t
-    | _ -> panic "Tried to emit outside of task"
-
   and break_ty ctx =
     match hd ctx.subctx with
     | CLoop t -> t
@@ -297,7 +287,10 @@ and unify t0 t1 (ctx:Ctx.t) =
   ctx
 
 and unify_ts ts0 ts1 (ctx:Ctx.t) =
-  zip ts0 ts1 |> foldl (fun ctx (t0, t1) -> unify t0 t1 ctx) ctx
+  if ts0 <> [] && ts1 <> [] then
+    zip ts0 ts1 |> foldl (fun ctx (t0, t1) -> unify t0 t1 ctx) ctx
+  else
+    ctx
 
 and compose s0 s1 =
   (s1 |> map (fun (x, t) -> (x, apply s0 t))) @ s0
@@ -318,10 +311,18 @@ and tvs t =
   tvs_of_t t NameSet.empty |> NameSet.elements
 
 and mgus ts0 ts1 s (ctx:Ctx.t) =
-  zip ts0 ts1 |> foldl (fun (s0, ctx) (t0, t1) ->
-    let (s1, ctx) = ctx |> mgu (apply s0 t0) (apply s0 t1) in
-    (compose s1 s0, ctx)
-  ) (s, ctx)
+  Printf.printf "\n[";
+  Pretty_hir.pr_types ts0 Pretty.Ctx.brief;
+  Printf.printf "] == [";
+  Pretty_hir.pr_types ts1 Pretty.Ctx.brief;
+  Printf.printf "]\n";
+  if ts0 <> [] && ts1 <> [] then
+    zip ts0 ts1 |> foldl (fun (s0, ctx) (t0, t1) ->
+      let (s1, ctx) = ctx |> mgu (apply s0 t0) (apply s0 t1) in
+      (compose s1 s0, ctx)
+    ) (s, ctx)
+  else
+    (s, ctx)
 
 and mgu t0 t1 ctx : ((Hir.name * Hir.ty) list * Ctx.t) =
   match t0, t1 with
@@ -541,9 +542,13 @@ and infer_ssa_rhs ctx (v0, t0, e0) =
   | Hir.ECast (v1, t2) ->
       ctx |> unify t0 (typeof v1)
           |> unify t0 t2
-  | Hir.EEmit v1 ->
+  | Hir.EEmit (v1, v2) ->
       ctx |> unify t0 (atom "unit")
-          |> unify (typeof v1) (ctx |> Ctx.output_event_ty)
+          |> unify (typeof v1) (Hir.TNominal (["Stream"], [typeof v2]))
+  | Hir.EReceive v1 ->
+      ctx |> unify (Hir.TNominal (["Stream"], [t0])) (typeof v1)
+  | Hir.EOn _ ->
+      todo ()
   | Hir.EEq (v1, v2) ->
       ctx |> unify t0 (atom "bool")
           |> unify (typeof v1) (typeof v2)
@@ -559,8 +564,6 @@ and infer_ssa_rhs ctx (v0, t0, e0) =
       let (t1, ctx) = infer_block b ctx in
       ctx |> unify t0 (atom "unit")
           |> unify t1 (atom "unit")
-  | Hir.EReceive ->
-      ctx |> unify t0 (ctx |> Ctx.input_event_ty)
   | Hir.ERecord fvs ->
       let fts = fts_of_fvs fvs ctx in
       let t1 = fts |> Hir.fields_to_rows Hir.TRowEmpty in

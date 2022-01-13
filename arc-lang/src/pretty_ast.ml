@@ -372,6 +372,13 @@ and pr_expr e ctx =
         pr_sep "," pr_receiver receivers (ctx |> Ctx.indent);
         ctx |> pr_indent;
         pr "}";
+    | EReceive e ->
+        pr "receive ";
+        pr_expr e ctx;
+    | EEmit (e0, e1) ->
+        pr_expr e0 ctx;
+        pr "!";
+        pr_expr e1 ctx;
     | ESelect (e0, e1) ->
         pr_expr e0 ctx;
         pr "[";
@@ -507,7 +514,6 @@ and pr_binop op _ctx =
   | BRInc -> pr "..="
   | BBy -> pr "by"
   | BNotIn -> pr "not in"
-  | BEmit -> pr "!"
 
 and pr_unop op _ctx =
   match op with

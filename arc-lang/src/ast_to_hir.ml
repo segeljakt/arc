@@ -313,19 +313,19 @@ module Ctx = struct
 
   (* Create a new cell *)
   and new_cell v t ctx =
-    let (v_fun, ctx) = ctx |> add_expr (Hir.EItem (["new_cell"], [t])) in
+    let (v_fun, ctx) = ctx |> add_expr (Hir.EItem (["cell"], [t])) in
     ctx |> add_expr (Hir.ECall (v_fun, [v]))
 
   (* Retrieve the value from a cell *)
   and read_cell v ctx =
     let (t, ctx) = ctx |> fresh_t in
-    let (v_fun, ctx) = ctx |> add_expr (Hir.EItem (["read_cell"], [t])) in
+    let (v_fun, ctx) = ctx |> add_expr (Hir.EItem (["read"], [t])) in
     ctx |> add_expr (Hir.ECall (v_fun, [v]))
 
   (* Update the value inside a cell *)
   and update_cell v0 v1 ctx =
     let (t, ctx) = ctx |> fresh_t in
-    let (v_fun, ctx) = ctx |> add_expr (Hir.EItem (["update_cell"], [t])) in
+    let (v_fun, ctx) = ctx |> add_expr (Hir.EItem (["update"], [t])) in
     ctx |> add_expr (Hir.ECall (v_fun, [v0; v1]))
 
   (* Create an empty block *)
@@ -337,21 +337,21 @@ module Ctx = struct
 
   and make_array vs ctx =
     let (t, ctx) = ctx |> fresh_t in
-    let (v_new, ctx) = ctx |> add_expr (Hir.EItem (["new_array"], [t])) in
-    let (v_push, ctx) = ctx |> add_expr (Hir.EItem (["push_array"], [t])) in
+    let (v_new, ctx) = ctx |> add_expr (Hir.EItem (["array"], [t])) in
+    let (v_push, ctx) = ctx |> add_expr (Hir.EItem (["push"], [t])) in
     let (v0, ctx) = ctx |> add_expr (Hir.ECall (v_new, [])) in
     let ctx = vs |> foldl (fun ctx v1 -> ctx |> add_expr (Hir.ECall (v_push, [v0; v1])) |> snd) ctx in
     (v0, ctx)
 
   and append_array v0 v1 ctx =
     let (t, ctx) = ctx |> fresh_t in
-    let (v_append, ctx) = ctx |> add_expr (Hir.EItem (["append_array"], [t])) in
+    let (v_append, ctx) = ctx |> add_expr (Hir.EItem (["append"], [t])) in
     ctx |> add_expr (Hir.ECall (v_append, [v0; v1]))
 
   (* Retrieve the value from a cell *)
   and select_array v0 v1 ctx =
     let (t, ctx) = ctx |> fresh_t in
-    let (v_fun, ctx) = ctx |> add_expr (Hir.EItem (["select_array"], [t])) in
+    let (v_fun, ctx) = ctx |> add_expr (Hir.EItem (["select"], [t])) in
     ctx |> add_expr (Hir.ECall (v_fun, [v0; v1]))
 
   and nominal x ts = Hir.TNominal ([x], ts)
@@ -578,6 +578,8 @@ and lower_expr expr ctx =
       let (v0, ctx) = Ctx.resolve_lvalue e0 ctx in
       let (v1, ctx) = lower_expr e1 ctx in
       ctx |> Ctx.update_cell v0 v1
+  | Ast.EBinOp (Ast.BNotIn, e0, e1) ->
+      lower_expr (Ast.EUnOp (Ast.UNot, (Ast.EBinOp (Ast.BIn, e0, e1)))) ctx
   | Ast.EBinOp (Ast.BNeq, e0, e1) ->
       lower_expr (Ast.EUnOp (Ast.UNot, (Ast.EBinOp (Ast.BEq, e0, e1)))) ctx
   | Ast.EBinOp (Ast.BEq, e0, e1) ->
@@ -684,6 +686,13 @@ and lower_expr expr ctx =
       let (v, ctx) = lower_expr e ctx in
       let cs = Hir.arms_to_clauses arms v in
       lower_clauses cs ctx
+  | Ast.EReceive e ->
+      let (v, ctx) = lower_expr e ctx in
+      ctx |> Ctx.add_expr (Hir.EReceive v)
+  | Ast.EEmit (e0, e1) ->
+      let (v0, ctx) = lower_expr e0 ctx in
+      let (v1, ctx) = lower_expr e1 ctx in
+      ctx |> Ctx.add_expr (Hir.EEmit (v0, v1))
   | Ast.EOn _ ->
       todo ()
 (*       let ctx = ctx |> Ctx.push_vscope in *)
@@ -1067,8 +1076,8 @@ and lower_closure ps e (ctx:Ctx.t) =
   (* Compile the block body *)
   let ctx = ctx |> Ctx.push_vscope in
   let (ps, ctx) = ps |> mapm lower_param ctx in
-  let (v0, ctx) = lower_expr e ctx in
-  let (ss0, ctx) = ctx |> Ctx.pop_vscope in
+  let ((ss0, v0), ctx) = lower_block e ctx in
+  let (ss1, ctx) = ctx |> Ctx.pop_vscope in
 
   let fvs = Hir.free_vars ps (ss0, v0) |> Hir.indexes_to_fields in
 
@@ -1079,8 +1088,8 @@ and lower_closure ps e (ctx:Ctx.t) =
   let ps = ps @ [p] in
 
   (* Create code for unpacking the closure record and its into parameters inside the function *)
-  let (ss1, ctx) = lambda_unpack v fvs ctx in
-  let b1 = (ss1 @ ss0, v0) in
+  let (ss2, ctx) = lambda_unpack v fvs ctx in
+  let b1 = (ss2 @ ss1 @ ss0, v0) in
 
   (* Create the function *)
   let (xs, ctx) = ctx |> Ctx.fresh_f in
