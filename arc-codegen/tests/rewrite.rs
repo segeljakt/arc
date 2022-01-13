@@ -10,8 +10,8 @@ mod basic1 {
 
     #[rewrite]
     pub enum Foo {
-        Bar(i32),
-        Baz(f32),
+        FooBar(i32),
+        FooBaz(f32),
     }
 }
 
@@ -32,8 +32,8 @@ mod basic3 {
     use arc_codegen::*;
     #[rewrite]
     pub enum A {
-        B(B),
-        C(C),
+        AB(B),
+        AC(C),
     }
 
     #[rewrite]
@@ -50,8 +50,8 @@ mod list {
 
     #[rewrite]
     pub enum List {
-        Cons(Cons),
-        Nil(Nil),
+        ListCons(Cons),
+        ListNil(Nil),
     }
 
     #[rewrite]
@@ -65,9 +65,9 @@ mod list {
 
     #[test]
     fn test() {
-        let l: List = enwrap!(Nil, new!(Nil {}));
-        let l: List = enwrap!(Cons, new!(Cons { val: 5, tail: l }));
-        let h: Cons = unwrap!(Cons, l);
+        let l: List = enwrap!(ListNil, new!(Nil {}));
+        let l: List = enwrap!(ListCons, new!(Cons { val: 5, tail: l }));
+        let h: Cons = unwrap!(ListCons, l);
         assert_eq!(h.val, 5);
     }
 }
@@ -86,7 +86,7 @@ mod structs {
 
     #[test]
     fn test() {
-        new!(Foo { a: 0, b: new!(Bar {}) });
+        let x: Foo = new!(Foo { a: 0, b: new!(Bar {}) });
     }
 }
 
@@ -95,11 +95,11 @@ mod unit {
 
     #[rewrite]
     pub enum Foo {
-        A(Unit),
+        FooBar(unit),
     }
 
     #[test]
     fn test() {
-        enwrap!(A, ());
+        let x: Foo = enwrap!(FooBar, ());
     }
 }

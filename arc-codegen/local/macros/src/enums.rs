@@ -9,23 +9,36 @@ use crate::new_id;
 pub(crate) fn rewrite(_: syn::AttributeArgs, mut enum_item: syn::ItemEnum) -> pm::TokenStream {
     let abstract_id = enum_item.ident.clone();
     let concrete_id = new_id(format!("Concrete{}", abstract_id));
-    let mod_id = new_id(format!("send_{}", abstract_id));
+    let sharable_mod_id = new_id(format!("sharable_enum_{}", abstract_id));
+    let sendable_mod_id = new_id(format!("sendable_enum_{}", abstract_id));
 
-    let mut sharable_enum_item = enum_item.clone();
-    let mut sendable_enum_item = enum_item;
+    let mut concrete_sharable_enum_item = enum_item.clone();
+    let mut concrete_sendable_enum_item = enum_item;
 
-    sharable_enum_item.ident = concrete_id.clone();
-    sendable_enum_item.ident = concrete_id.clone();
+    concrete_sharable_enum_item.ident = concrete_id.clone();
+    concrete_sendable_enum_item.ident = concrete_id.clone();
 
-    // Generate the sendable enum
-    sendable_enum_item.variants.iter_mut().for_each(|v| {
-        v.fields.iter_mut().for_each(|f| {
-            let ty = f.ty.clone();
-            f.ty = syn::parse_quote!(<super::#ty as arc_codegen::Convert>::T);
-        })
-    });
+    concrete_sharable_enum_item
+        .variants
+        .iter_mut()
+        .for_each(|v| {
+            v.fields.iter_mut().for_each(|f| {
+                let ty = f.ty.clone();
+                f.ty = syn::parse_quote!(super::#ty);
+            })
+        });
 
-    let variant_id = sharable_enum_item
+    concrete_sendable_enum_item
+        .variants
+        .iter_mut()
+        .for_each(|v| {
+            v.fields.iter_mut().for_each(|f| {
+                let ty = f.ty.clone();
+                f.ty = syn::parse_quote!(<super::#ty as arc_codegen::IntoSendable>::T);
+            })
+        });
+
+    let variant_id = concrete_sharable_enum_item
         .variants
         .iter()
         .map(|v| &v.ident)
@@ -33,73 +46,63 @@ pub(crate) fn rewrite(_: syn::AttributeArgs, mut enum_item: syn::ItemEnum) -> pm
 
     quote!(
 
-        #[derive(Clone, Debug)]
-        pub struct #abstract_id {
-            pub concrete: std::rc::Rc<#concrete_id>,
-        }
-
-        impl Convert for #concrete_id {
-            type T = #abstract_id;
-            fn convert(self) -> Self::T {
-                Self::T {
-                    concrete: std::rc::Rc::new(self),
-                }
-            }
-        }
-
-        #[derive(Clone, Debug)]
-        #sharable_enum_item
-
-        use #concrete_id::*;
-
-        pub mod #mod_id {
+        pub mod #sharable_mod_id {
             use arc_codegen::*;
 
             #[derive(Clone, Debug)]
-            pub struct #abstract_id {
-                pub concrete: Box<#concrete_id>,
-            }
+            pub struct #abstract_id(pub std::rc::Rc<#concrete_id>);
 
-            impl Convert for #concrete_id {
-                type T = #abstract_id;
-                fn convert(self) -> Self::T {
-                    Self::T {
-                        concrete: Box::new(self),
-                    }
+            impl From<#concrete_id> for #abstract_id {
+                fn from(v: #concrete_id) -> Self {
+                    Self(std::rc::Rc::new(v))
                 }
             }
 
             #[derive(Clone, Debug)]
-            #sendable_enum_item
+            #concrete_sharable_enum_item
+        }
 
-            // Sharable to Sendable
-            impl Convert for super::#abstract_id {
-                type T = #abstract_id;
-                fn convert(self) -> Self::T {
-                    match self.concrete.as_ref() {
-                        #(
-                            super::#concrete_id::#variant_id(x) => #abstract_id {
-                                concrete: Box::new(#concrete_id::#variant_id(x.clone().convert()))
-                            }
-                        ),*
-                    }
+        pub mod #sendable_mod_id {
+            use arc_codegen::*;
+
+            #[derive(Clone, Debug)]
+            pub struct #abstract_id(pub Box<#concrete_id>);
+
+            impl From<#concrete_id> for #abstract_id {
+                fn from(v: #concrete_id) -> Self {
+                    Self(Box::new(v))
                 }
             }
 
-            // Sendable to Sharable
-            impl Convert for #abstract_id {
-                type T = super::#abstract_id;
-                fn convert(self) -> Self::T {
-                    match *self.concrete {
-                        #(
-                            #concrete_id::#variant_id(x) => super::#abstract_id {
-                                concrete: std::rc::Rc::new(super::#concrete_id::#variant_id(x.convert()))
-                            }
-                        ),*
-                    }
+            #[derive(Clone, Debug)]
+            #concrete_sendable_enum_item
+        }
+
+        use #sharable_mod_id::#abstract_id;
+        use #sharable_mod_id::#concrete_id::*;
+
+        impl IntoSendable for #sharable_mod_id::#abstract_id {
+            type T = #sendable_mod_id::#abstract_id;
+            fn into_sendable(self) -> Self::T {
+                match self.0.as_ref() {
+                    #(
+                        #sharable_mod_id::#concrete_id::#variant_id(x) =>
+                        #sendable_mod_id::#concrete_id::#variant_id(x.clone().into_sendable()).into()
+                    ),*
                 }
             }
+        }
 
+        impl IntoSharable for #sendable_mod_id::#abstract_id {
+            type T = #sharable_mod_id::#abstract_id;
+            fn into_sharable(self) -> Self::T {
+                match *self.0 {
+                    #(
+                        #sendable_mod_id::#concrete_id::#variant_id(x) =>
+                        #sharable_mod_id::#concrete_id::#variant_id(x.into_sharable()).into()
+                    ),*
+                }
+            }
         }
 
     )

@@ -22,7 +22,7 @@
 #[macro_export]
 macro_rules! enwrap {
     (@done $path:path, $expr:expr) => {
-        $path($expr).convert()
+        $path($expr).into()
     };
     ($mod:ident :: $enum:ident :: $variant:ident , $expr:expr) => {
         arc_codegen::paste!(arc_codegen::enwrap!(@done $mod::[<Concrete $enum>]::$variant, $expr))
@@ -52,7 +52,7 @@ macro_rules! enwrap {
 #[macro_export]
 macro_rules! is {
     (@done $path:path, $expr:expr) => {
-        if let $path(_) = $expr.concrete.as_ref() {
+        if let $path(_) = $expr.0.as_ref() {
             true
         } else {
             false
@@ -86,7 +86,7 @@ macro_rules! is {
 #[macro_export]
 macro_rules! unwrap {
     (@done $path:path, $expr:expr) => {
-        if let $path(v) = $expr.concrete.as_ref() {
+        if let $path(v) = $expr.0.as_ref() {
             v.clone()
         } else {
             unreachable!()

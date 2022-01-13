@@ -15,7 +15,7 @@
 #[macro_export]
 macro_rules! new {
     (@done $path:tt { $($arg:tt)* }) => {
-        ($path { $($arg)* }).convert()
+        ($path { $($arg)* }).into()
     };
     ($mod:tt :: $struct:tt { $($arg:tt)* }) => {
         arc_codegen::paste!(arc_codegen::new!(@done $mod::[<Concrete $struct>] { $($arg)* }))

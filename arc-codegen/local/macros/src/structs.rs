@@ -7,21 +7,34 @@ use crate::new_id;
 pub(crate) fn rewrite(_: syn::AttributeArgs, struct_item: syn::ItemStruct) -> pm::TokenStream {
     let abstract_id = struct_item.ident.clone();
     let concrete_id = new_id(format!("Concrete{}", struct_item.ident));
-    let mod_id = new_id(format!("send_{}", struct_item.ident));
+    let sharable_mod_id = new_id(format!("sharable_struct_{}", struct_item.ident));
+    let sendable_mod_id = new_id(format!("sendable_struct_{}", struct_item.ident));
 
-    let mut sharable_struct_item = struct_item.clone();
-    let mut sendable_struct_item = struct_item;
+    let mut concrete_sharable_struct_item = struct_item.clone();
+    let mut concrete_sendable_struct_item = struct_item;
 
-    sharable_struct_item.ident = concrete_id.clone();
-    sendable_struct_item.ident = concrete_id.clone();
+    concrete_sharable_struct_item.ident = concrete_id.clone();
+    concrete_sendable_struct_item.ident = concrete_id.clone();
 
     // Generate the sendable struct
-    sendable_struct_item.fields.iter_mut().for_each(|f| {
-        let ty = f.ty.clone();
-        f.ty = syn::parse_quote!(<super::#ty as arc_codegen::Convert>::T);
-    });
+    concrete_sharable_struct_item
+        .fields
+        .iter_mut()
+        .for_each(|f| {
+            let ty = f.ty.clone();
+            f.ty = syn::parse_quote!(super::#ty);
+        });
 
-    let field_id = sendable_struct_item
+    // Generate the sendable struct
+    concrete_sendable_struct_item
+        .fields
+        .iter_mut()
+        .for_each(|f| {
+            let ty = f.ty.clone();
+            f.ty = syn::parse_quote!(<super::#ty as arc_codegen::IntoSendable>::T);
+        });
+
+    let field_id = concrete_sendable_struct_item
         .fields
         .iter()
         .map(|f| &f.ident)
@@ -29,65 +42,53 @@ pub(crate) fn rewrite(_: syn::AttributeArgs, struct_item: syn::ItemStruct) -> pm
 
     quote!(
 
-        #[derive(Clone, Debug, arc_codegen::derive_more::Deref)]
-        pub struct #abstract_id {
-            pub concrete: std::rc::Rc<#concrete_id>,
-        }
-
-        impl arc_codegen::Convert for #concrete_id {
-            type T = #abstract_id;
-            fn convert(self) -> Self::T {
-                Self::T {
-                    concrete: std::rc::Rc::new(self),
-                }
-            }
-        }
-
-        #[derive(Clone, Debug)]
-        #sharable_struct_item
-
-        mod #mod_id {
-
+        pub mod #sharable_mod_id {
             #[derive(Clone, Debug, arc_codegen::derive_more::Deref)]
-            pub struct #abstract_id {
-                pub concrete: Box<#concrete_id>,
-            }
+            pub struct #abstract_id(pub std::rc::Rc<#concrete_id>);
 
-            // Concrete to Abstract
-            impl arc_codegen::Convert for #concrete_id {
-                type T = #abstract_id;
-                fn convert(self) -> Self::T {
-                    Self::T {
-                        concrete: Box::new(self),
-                    }
+            impl From<#concrete_id> for #abstract_id {
+                fn from(v: #concrete_id) -> Self {
+                    Self(std::rc::Rc::new(v))
                 }
             }
 
             #[derive(Clone, Debug)]
-            #sendable_struct_item
+            #concrete_sharable_struct_item
+        }
 
-            // Sharable to Sendable
-            impl arc_codegen::Convert for super::#abstract_id {
-                type T = #abstract_id;
-                fn convert(self) -> Self::T {
-                    #abstract_id {
-                        concrete: Box::new(#concrete_id {
-                            #(#field_id: self.concrete.as_ref().#field_id.clone().convert()),*
-                        })
-                    }
+        mod #sendable_mod_id {
+
+            #[derive(Clone, Debug, arc_codegen::derive_more::Deref)]
+            pub struct #abstract_id(pub Box<#concrete_id>);
+
+            // Concrete to Abstract
+            impl From<#concrete_id> for #abstract_id {
+                fn from(v: #concrete_id) -> Self {
+                    Self(Box::new(v))
                 }
             }
 
-            // Sendable to Sharable
-            impl arc_codegen::Convert for #abstract_id {
-                type T = super::#abstract_id;
-                fn convert(self) -> Self::T {
-                    super::#abstract_id {
-                        concrete: std::rc::Rc::new(super::#concrete_id {
-                            #(#field_id: self.concrete.#field_id.convert()),*
-                        })
-                    }
-                }
+            #[derive(Clone, Debug)]
+            #concrete_sendable_struct_item
+        }
+
+        use #sharable_mod_id::{#abstract_id, #concrete_id};
+
+        impl arc_codegen::IntoSendable for #sharable_mod_id::#abstract_id {
+            type T = #sendable_mod_id::#abstract_id;
+            fn into_sendable(self) -> Self::T {
+                #sendable_mod_id::#concrete_id {
+                    #(#field_id: self.0.as_ref().#field_id.clone().into_sendable()),*
+                }.into()
+            }
+        }
+
+        impl arc_codegen::IntoSharable for #sendable_mod_id::#abstract_id {
+            type T = #sharable_mod_id::#abstract_id;
+            fn into_sharable(self) -> Self::T {
+                #sharable_mod_id::#concrete_id {
+                    #(#field_id: self.0.#field_id.into_sharable()),*
+                }.into()
             }
         }
     )

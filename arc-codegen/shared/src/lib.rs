@@ -2,14 +2,15 @@
 
 pub mod enums;
 // pub mod python;
-pub mod structs;
-pub mod functions;
 pub mod conversions;
+pub mod functions;
 pub mod primitives;
-pub mod values;
 pub mod strings;
+pub mod structs;
+pub mod values;
 // pub(crate) mod cloudpickle;
 
+pub use derive_more::{From, Into};
 pub use derive_more;
 pub use dyn_clone;
 pub use paste;

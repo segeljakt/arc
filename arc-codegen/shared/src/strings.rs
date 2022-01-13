@@ -1,37 +1,39 @@
-use derive_more::Deref;
-use derive_more::From;
+use crate::conversions::IntoSendable;
+use crate::conversions::IntoSharable;
 
-#[derive(From, Deref)]
-#[from(forward)]
-pub struct String {
-    pub concrete: std::rc::Rc<std::string::String>,
-}
-
-mod send {
-    use crate::conversions::Convert;
+pub mod sharable_string {
     use derive_more::Deref;
     use derive_more::From;
 
     #[derive(From, Deref)]
     #[from(forward)]
-    pub struct String {
-        pub concrete: std::string::String,
-    }
+    pub struct String(pub std::rc::Rc<std::string::String>);
+}
 
-    impl Convert for super::String {
-        type T = String;
-        fn convert(self) -> Self::T {
-            String::from(self.as_ref())
-        }
-    }
+mod sendable_string {
+    use derive_more::Deref;
+    use derive_more::From;
 
-    impl Convert for String {
-        type T = super::String;
-        fn convert(self) -> Self::T {
-            super::String::from(self.concrete)
-        }
+    #[derive(From, Deref)]
+    #[from(forward)]
+    pub struct String(pub std::string::String);
+}
+
+impl IntoSendable for sharable_string::String {
+    type T = sendable_string::String;
+    fn into_sendable(self) -> Self::T {
+        self.0.as_ref().into()
     }
 }
+
+impl IntoSharable for sendable_string::String {
+    type T = sharable_string::String;
+    fn into_sharable(self) -> Self::T {
+        self.0.into()
+    }
+}
+
+use sharable_string::String;
 
 impl String {
     /// Concatenates `self` with `other`.
@@ -46,7 +48,7 @@ impl String {
     }
     /// Returns `true` if `self` contains `other` substring, else `false`.
     pub fn contains(self, other: Self) -> bool {
-        self.concrete.contains(other.as_str())
+        self.0.contains(other.as_str())
     }
     /// Returns `true` if `self` contains `other` substring, else `false`.
     pub fn truncate(self, new_len: usize) -> String {
