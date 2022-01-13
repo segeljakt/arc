@@ -3,32 +3,32 @@
 
 def test() {
 # ANCHOR: example
-val a = 1;
+val n = 1;
 val b = true;
 
 # Arithmetic
-- a;
-a + a;
-a - a;
-a * a;
-a / a;
-a ** a;
-a % a;
+- n;
+n + n;
+n - n;
+n * n;
+n / n;
+n ** n;
+n % n;
 
 # Equality
-a == a;
-a != a;
+n == n;
+n != n;
 
 # Logical
 b and b;
 b or b;
-b band b;
-b bor b;
-b bxor b;
+n band n;
+n bor n;
+n bxor n;
 not b;
 
 # Containers
-a in [a, a, a];
-a not in [];
+n in [n, n, n];
+n not in [];
 # ANCHOR_END: example
 }
