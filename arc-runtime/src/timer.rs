@@ -5,64 +5,65 @@ use hierarchical_hash_wheel_timer::wheels::Skip;
 use hierarchical_hash_wheel_timer::UuidOnlyTimerEntry as Entry;
 use uuid::Uuid;
 
-use crate::port::DataReqs;
-use crate::task::Task;
+use crate::data::Data;
 
 use std::collections::HashMap;
 use std::time::Duration;
 
 /// An event timer
-pub struct EventTimer<S: DataReqs, I: DataReqs, O: DataReqs, R: DataReqs> {
+pub struct Timer {
     pub wheel: QuadWheelWithOverflow<Entry>,
-    pub data: HashMap<Uuid, fn(&mut Task<S, I, O, R>)>,
+    pub callbacks: HashMap<Uuid, Callback>,
+    pub duration: Duration,
 }
 
-type Callback<S, I, O, R> = fn(&mut Task<S, I, O, R>);
+type Callback = fn();
 
-impl<S: DataReqs, I: DataReqs, O: DataReqs, R: DataReqs> Default for EventTimer<S, I, O, R> {
+impl Default for Timer {
     fn default() -> Self {
         Self {
             wheel: QuadWheelWithOverflow::default(),
-            data: HashMap::new(),
+            callbacks: HashMap::new(),
+            duration: Duration::from_millis(0),
         }
     }
 }
 
-impl<S: DataReqs, I: DataReqs, O: DataReqs, R: DataReqs> Task<S, I, O, R> {
+impl Timer {
     /// Execute callback after duration
-    pub fn after(&mut self, dur: Duration, cb: Callback<S, I, O, R>) {
-        let entry = Entry::with_random_id(dur);
-        self.etimer.data.insert(entry.id, cb);
-        self.etimer.wheel.insert(entry).unwrap();
+    pub fn after(&mut self, duration: Duration, callback: Callback) {
+        let entry = Entry::with_random_id(duration);
+        self.callbacks.insert(entry.id, callback);
+        self.wheel.insert(entry).unwrap();
     }
 
-    /// Advance the event timer and execute timers which have expired.
+    /// Advance the timer and execute timers which have expired.
     /// TODO: Handle overflow. Currently assumes Duration <= u32::MAX.
     pub(crate) fn advance(&mut self, mut remaining: Duration) {
         while remaining.as_millis() > 0 {
-            match self.etimer.wheel.can_skip() {
+            match self.wheel.can_skip() {
                 // No timers are scheduled
                 Skip::Empty => {
-                    self.time += remaining;
+                    self.duration += remaining;
                 }
                 // Timers are scheduled at the next millisecond
                 Skip::None => {
-                    self.time += Duration::from_millis(1);
+                    self.duration += Duration::from_millis(1);
                     remaining -= Duration::from_millis(1);
-                    for e in self.etimer.wheel.tick() {
-                        (self.etimer.data.remove(&e.id).unwrap())(self);
+                    for e in self.wheel.tick() {
+                        (self.callbacks.remove(&e.id).unwrap())();
                     }
                 }
                 // Timers are scheduled sometime later
                 Skip::Millis(skip) => {
                     if skip as u128 >= remaining.as_millis() {
                         // No more entries to expire
-                        self.etimer.wheel.skip(remaining.as_millis() as u32);
+                        self.wheel.skip(remaining.as_millis() as u32);
                         break;
                     } else {
                         // Skip until next entry
-                        self.etimer.wheel.skip(skip);
-                        self.time += Duration::from_millis(skip as u64);
+                        self.wheel.skip(skip);
+                        self.duration += Duration::from_millis(skip as u64);
                         remaining -= Duration::from_millis(skip as u64);
                     }
                 }

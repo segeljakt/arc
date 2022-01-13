@@ -4,6 +4,10 @@
 macro_rules! compile_test {
     {$($mod:tt)::+} => {
         use arc_runtime::prelude::*;
+
+        // Note: This may only be used by the main thread.
+        static EXECUTOR: Executor = Executor::new();
+
         #[derive(Actor, ComponentDefinition)]
         struct Source<I: IntoIterator<Item = T> + Data, T: Data>
         where
@@ -117,21 +121,43 @@ macro_rules! compile_test {
             }
         }
 
+        fn source<I, T>(i: I) -> $($mod)::+::Pullable<T>
+        where
+            I: IntoIterator<Item = T> + Data,
+            T: Data,
+            <I as IntoIterator>::IntoIter: Data,
+        {
+            let (a0, a1) = $($mod)::+::channel(&EXECUTOR);
+            EXECUTOR.create_task(move || Source::new(i, a0));
+            a1
+        }
+
+        fn map<A, B>(a: $($mod)::+::Pullable<A>, f: fn(A) -> B) -> $($mod)::+::Pullable<B>
+        where
+            A: Data,
+            B: Data,
+        {
+            let (b0, b1) = $($mod)::+::channel(&EXECUTOR);
+            EXECUTOR.create_task(move || Map::new(a, f, b0));
+            b1
+        }
+
+        fn log<T>(a: $($mod)::+::Pullable<T>)
+        where
+            T: Data,
+        {
+            EXECUTOR.create_task(move || Log::new(a));
+        }
+
         fn plus_one(x: i32) -> i32 {
             x + 1
         }
 
         #[test]
         fn main() {
-            let system = KompactConfig::default().build().unwrap();
-            {
-                let (pushable0, pullable0) = $($mod)::+::channel(&system);
-                let (pushable1, pullable1) = $($mod)::+::channel(&system);
-                system.create_task(move || Source::new(0..100, pushable0));
-                system.create_task(move || Map::new(pullable0, plus_one, pushable1));
-                system.create_task(move || Log::new(pullable1));
-            }
-            system.await_termination();
+            let s = source(0..100);
+            let s = map(s, plus_one);
+            let _ = log(s);
         }
     }
 }
@@ -139,12 +165,15 @@ macro_rules! compile_test {
 mod test1 {
     compile_test!(arc_runtime::channels::remote::concurrent);
 }
-// mod test2 {
-//     compile_test!(arc_runtime::channels::remote::broadcast);
-// }
-// mod test3 {
-//     compile_test!(arc_runtime::channels::local::concurrent);
-// }
-// mod test4 {
-//     compile_test!(arc_runtime::channels::local::broadcast);
-// }
+
+mod test2 {
+    compile_test!(arc_runtime::channels::remote::broadcast);
+}
+
+mod test3 {
+    compile_test!(arc_runtime::channels::local::concurrent);
+}
+
+mod test4 {
+    compile_test!(arc_runtime::channels::local::broadcast);
+}

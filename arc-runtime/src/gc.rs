@@ -9,11 +9,12 @@ mod test {
     use comet::gc_base::GcBase;
     use comet::letroot;
     use comet::minimark::instantiate_minimark;
+    use comet::minimark::MiniMark;
     use comet::minimark::MiniMarkOptions;
 
     pub enum List<T: Collectable> {
         Nil,
-        Cons(T, Gc<List<T>>),
+        Cons(T, Gc<List<T>, MiniMark>),
     }
 
     unsafe impl<T: Collectable> Trace for List<T> {
@@ -36,22 +37,19 @@ mod test {
         let mut mutator = instantiate_minimark(opts);
         let stack = mutator.shadow_stack();
 
-        letroot! {
-            list = stack,
-            mutator.allocate(List::Nil, AllocationSpace::New)
-        };
+        letroot!(l = stack, mutator.allocate(List::Nil, AllocationSpace::New));
 
         for i in 0..100 {
             println!("{}", i);
-            *list = mutator.allocate(List::Cons(i, *list), AllocationSpace::New);
+            *l = mutator.allocate(List::Cons(i, *l), AllocationSpace::New);
         }
 
         for i in 0..100 {
-            match **list {
+            match **l {
                 List::Nil => break,
                 List::Cons(data, tail) => {
                     assert_eq!(data, 99 - i);
-                    *list = tail;
+                    *l = tail;
                 }
             }
         }

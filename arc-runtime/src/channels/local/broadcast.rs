@@ -6,12 +6,21 @@ use tokio::sync::broadcast::Sender;
 use crate::control::Control;
 use crate::data::Data;
 
+#[derive(Clone)]
 pub struct Pushable<T: Data>(Sender<T>);
-pub struct Pullable<T: Data>(Receiver<T>);
 
+pub struct Pullable<T: Data>(Sender<T>, Receiver<T>);
+
+impl<T: Data> Clone for Pullable<T> {
+    fn clone(&self) -> Self {
+        Pullable(self.0.clone(), self.0.subscribe())
+    }
+}
+
+/// TODO: Processing will currently only stop if all pullers are dropped.
 pub fn channel<T: Data>(_: &KompactSystem) -> (Pushable<T>, Pullable<T>) {
     let (l, r) = tokio::sync::broadcast::channel(100);
-    (Pushable(l), Pullable(r))
+    (Pushable(l.clone()), Pullable(l, r))
 }
 
 impl<T: Data> Pushable<T> {
@@ -25,7 +34,7 @@ impl<T: Data> Pushable<T> {
 
 impl<T: Data> Pullable<T> {
     pub async fn pull(&mut self) -> Control<T> {
-        self.0
+        self.1
             .recv()
             .await
             .map(Control::Continue)

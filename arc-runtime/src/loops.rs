@@ -4,10 +4,6 @@ use kompact::prelude::*;
 
 use std::sync::Arc;
 
-use crate::port::*;
-use crate::stream::*;
-use crate::task::*;
-
 impl<I: DataReqs> Stream<I> {
     /// Apply a transformation to a stream to produce a new stream.
     /// ```ignore
@@ -23,47 +19,7 @@ impl<I: DataReqs> Stream<I> {
         self,
         f: fn(Stream<I>) -> (Stream<I>, Stream<O>),
     ) -> Stream<O> {
-        let task = Task::new(
-            "LoopHead",
-            (),
-            |task: &mut Task<(), I, I, Never>, event: I| {
-                task.emit(event);
-            },
-        );
-        let start_fns = self.start_fns.clone();
-        let client = self.client.clone();
-        let task = self.client.system().create(|| task);
-        task.on_definition(|consumer| (self.connector)(&mut consumer.data_iport));
-        let producer = task.clone();
-        let connector: Arc<ConnectFn<_>> = Arc::new(move |iport| {
-            producer.on_definition(|producer| {
-                iport.connect(producer.data_oport.share());
-                producer.data_oport.connect(iport.share());
-            });
-        });
-        let task_feedback = task.clone();
-        start_fns
-            .borrow_mut()
-            .push(Box::new(move || client.system().start(&task)));
-        let client = self.client.clone();
-        let stream = Stream::new(client, connector, start_fns);
-        let (feedback, output) = f(stream);
-        task_feedback.on_definition(|consumer| (feedback.connector)(&mut consumer.data_iport));
-        output
-    }
-
-    pub fn structured_loop<R: DataReqs, O: DataReqs, const A: usize>(
-        self,
-        _body: fn(Stream<I>, Stream<R>) -> (Stream<R>, Stream<O>),
-        _cond: fn(R, Scope<A>) -> bool,
-    ) -> Stream<O> {
         todo!()
-        // Iteration Head => Termination condition
-        // Iteration Tail
-        // Entry
-        // Exit
-        // Progress = [pn, pn-1, pn-2, .. p0] = [Current|Context]
-        // P ≥ P′ iff (Pctx = P′ctx) ∧ (PT ≥ P′T)
     }
 }
 
