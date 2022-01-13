@@ -14,6 +14,7 @@ pub mod control;
 pub mod data;
 pub mod executor;
 pub mod gc;
+pub mod task;
 pub mod timer;
 
 pub mod prelude {
@@ -40,6 +41,7 @@ pub mod prelude {
     pub use crate::data::Duration;
     pub use crate::data::Key;
     pub use crate::executor::Executor;
+    pub use crate::task::message::TaskMessage;
 
     pub use kompact::prelude::info;
     pub use kompact::prelude::warn;
@@ -57,6 +59,7 @@ pub mod prelude {
     pub use kompact::prelude::Handled;
     pub use kompact::prelude::KompactConfig;
     pub use kompact::prelude::MsgEnvelope;
+    pub use kompact::prelude::NetMessage;
     pub use kompact::prelude::NetworkConfig;
     pub use kompact::prelude::Never;
 }

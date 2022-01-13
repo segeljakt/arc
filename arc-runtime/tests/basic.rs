@@ -8,12 +8,25 @@ use arc_runtime::prelude::*;
 // Note: This may only be used by the main thread.
 static EXECUTOR: Executor = Executor::new();
 
-#[derive(Actor, ComponentDefinition)]
+#[derive(ComponentDefinition)]
 struct DoThing {
     ctx: ComponentContext<Self>,
     a: Pullable<i32>,
     b: Pullable<i32>,
     c: Pushable<i32>,
+}
+
+impl Actor for DoThing {
+    type Message = TaskMessage;
+
+    fn receive_local(&mut self, msg: Self::Message) -> Handled {
+        Handled::Ok
+    }
+
+    fn receive_network(&mut self, msg: kompact::prelude::NetMessage) -> Handled {
+        Handled::Ok
+    }
+
 }
 
 impl DoThing {

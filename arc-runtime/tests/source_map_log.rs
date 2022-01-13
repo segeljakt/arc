@@ -8,7 +8,7 @@ macro_rules! compile_test {
         // Note: This may only be used by the main thread.
         static EXECUTOR: Executor = Executor::new();
 
-        #[derive(Actor, ComponentDefinition)]
+        #[derive(ComponentDefinition)]
         struct Source<I: IntoIterator<Item = T> + Data, T: Data>
         where
             <I as IntoIterator>::IntoIter: Data,
@@ -18,7 +18,7 @@ macro_rules! compile_test {
             pushable: $($mod)::+::Pushable<T>,
         }
 
-        #[derive(Actor, ComponentDefinition)]
+        #[derive(ComponentDefinition)]
         struct Map<A: Data, B: Data> {
             ctx: ComponentContext<Self>,
             pullable: $($mod)::+::Pullable<A>,
@@ -26,7 +26,7 @@ macro_rules! compile_test {
             pushable: $($mod)::+::Pushable<B>,
         }
 
-        #[derive(Actor, ComponentDefinition)]
+        #[derive(ComponentDefinition)]
         struct Log<T: Data> {
             ctx: ComponentContext<Self>,
             pullable: $($mod)::+::Pullable<T>,
@@ -118,6 +118,45 @@ macro_rules! compile_test {
                     Handled::DieNow
                 });
                 Handled::Ok
+            }
+        }
+
+        impl<I: IntoIterator<Item = T> + Data, T: Data> Actor for Source<I, T>
+        where
+            <I as IntoIterator>::IntoIter: Data,
+        {
+            type Message = TaskMessage;
+
+            fn receive_local(&mut self, _msg: Self::Message) -> Handled {
+                Handled::Ok
+            }
+
+            fn receive_network(&mut self, _msg: NetMessage) -> Handled {
+                unreachable!()
+            }
+        }
+
+        impl<A: Data, B: Data> Actor for Map<A, B> {
+            type Message = TaskMessage;
+
+            fn receive_local(&mut self, _msg: Self::Message) -> Handled {
+                Handled::Ok
+            }
+
+            fn receive_network(&mut self, _msg: NetMessage) -> Handled {
+                unreachable!()
+            }
+        }
+
+        impl<T: Data> Actor for Log<T> {
+            type Message = TaskMessage;
+
+            fn receive_local(&mut self, _msg: Self::Message) -> Handled {
+                Handled::Ok
+            }
+
+            fn receive_network(&mut self, _msg: NetMessage) -> Handled {
+                unreachable!()
             }
         }
 
