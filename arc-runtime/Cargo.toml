@@ -10,6 +10,7 @@ name = "arc_runtime"
 path = "src/lib.rs"
 
 [dependencies]
+macros                        = { path = "./macros" }
 kompact                       = { git = "https://github.com/segeljakt/kompact", features = ["type_erasure"] }
 paste                         = { version = "1.0.5" }
 slog                          = { version = "2.7.0" }

@@ -4,13 +4,13 @@
 ///
 /// ```
 /// mod foo {
-///     #[arc_codegen::rewrite]
+///     #[arc_runtime::prelude::rewrite]
 ///     pub struct Bar {
 ///         x: i32,
 ///         y: i32
 ///     }
 /// }
-/// let x = arc_codegen::new!(Bar { x: i32, y: i32 });
+/// let x = arc_runtime::prelude::new!(Bar { x: i32, y: i32 });
 /// ```
 #[macro_export]
 macro_rules! new {
@@ -18,10 +18,10 @@ macro_rules! new {
         ($path { $($arg)* }).into()
     };
     ($mod:tt :: $struct:tt { $($arg:tt)* }) => {
-        arc_codegen::paste!(arc_codegen::new!(@done $mod::[<Concrete $struct>] { $($arg)* }))
+        arc_runtime::prelude::paste!(arc_runtime::prelude::new!(@done $mod::[<Concrete $struct>] { $($arg)* }))
     };
     ($struct:tt { $($arg:tt)* }) => {
-        arc_codegen::paste!(arc_codegen::new!(@done [<Concrete $struct>] { $($arg)* }))
+        arc_runtime::prelude::paste!(arc_runtime::prelude::new!(@done [<Concrete $struct>] { $($arg)* }))
     };
 }
 
@@ -29,14 +29,14 @@ macro_rules! new {
 ///
 /// ```
 /// mod foo {
-///     #[arc_codegen::rewrite]
+///     #[arc_runtime::prelude::rewrite]
 ///     pub struct Bar {
 ///         x: i32,
 ///         y: i32
 ///     }
 /// }
-/// let a = arc_codegen::new!(Bar { x: i32, y: i32 });
-/// let b = arc_codegen::access!(a, x);
+/// let a = arc_runtime::prelude::new!(Bar { x: i32, y: i32 });
+/// let b = arc_runtime::prelude::access!(a, x);
 /// ```
 #[macro_export]
 macro_rules! access {

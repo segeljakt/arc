@@ -4,6 +4,7 @@ pub mod functions;
 pub mod primitives;
 pub mod strings;
 pub mod structs;
+pub mod values;
 
 use comet::api::Collectable;
 pub use time::PrimitiveDateTime as DateTime;

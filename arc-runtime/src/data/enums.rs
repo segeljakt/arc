@@ -11,13 +11,13 @@
 ///
 /// ```
 /// mod foo {
-///     #[arc_codegen::rewrite]
+///     #[arc_runtime::prelude::rewrite]
 ///     pub enum Bar {
 ///         Baz(i32),
 ///         Qux(i32)
 ///     }
 /// }
-/// let x = arc_codegen::enwrap!(foo::Bar::Baz, 5);
+/// let x = arc_runtime::prelude::enwrap!(foo::Bar::Baz, 5);
 /// ```
 #[macro_export]
 macro_rules! enwrap {
@@ -25,13 +25,13 @@ macro_rules! enwrap {
         $path($expr).into()
     };
     ($mod:ident :: $enum:ident :: $variant:ident , $expr:expr) => {
-        arc_codegen::paste!(arc_codegen::enwrap!(@done $mod::[<Concrete $enum>]::$variant, $expr))
+        arc_runtime::prelude::paste!(arc_runtime::prelude::enwrap!(@done $mod::[<Concrete $enum>]::$variant, $expr))
     };
     ($enum:ident :: $variant:ident , $expr:expr) => {
-        arc_codegen::paste!(arc_codegen::enwrap!(@done [<Concrete $enum>]::$variant, $expr))
+        arc_runtime::prelude::paste!(arc_runtime::prelude::enwrap!(@done [<Concrete $enum>]::$variant, $expr))
     };
     ($variant:ident , $expr:expr) => {
-        arc_codegen::enwrap!(@done $variant, $expr)
+        arc_runtime::prelude::enwrap!(@done $variant, $expr)
     };
 }
 
@@ -39,15 +39,15 @@ macro_rules! enwrap {
 ///
 /// ```
 /// mod foo {
-///     #[arc_codegen::rewrite]
+///     #[arc_runtime::prelude::rewrite]
 ///     pub enum Bar {
 ///         Baz(i32),
 ///         Qux(i32)
 ///     }
 /// }
 ///
-/// let x = arc_codegen::enwrap!(foo::Bar::Baz, 5);
-/// assert!(arc_codegen::is!(foo::Bar::Baz, x));
+/// let x = arc_runtime::prelude::enwrap!(foo::Bar::Baz, 5);
+/// assert!(arc_runtime::prelude::is!(foo::Bar::Baz, x));
 /// ```
 #[macro_export]
 macro_rules! is {
@@ -59,13 +59,13 @@ macro_rules! is {
         }
     };
     ($mod:ident :: $enum:ident :: $variant:ident , $expr:expr) => {
-        arc_codegen::paste!(arc_codegen::is!(@done $mod::[<Concrete $enum>]::$variant, $expr))
+        arc_runtime::prelude::paste!(arc_runtime::prelude::is!(@done $mod::[<Concrete $enum>]::$variant, $expr))
     };
     ($enum:ident :: $variant:ident , $expr:expr) => {
-        arc_codegen::paste!(arc_codegen::is!(@done [<Concrete $enum>]::$variant, $expr))
+        arc_runtime::prelude::paste!(arc_runtime::prelude::is!(@done [<Concrete $enum>]::$variant, $expr))
     };
     ($variant:ident , $expr:expr) => {
-        arc_codegen::is!(@done $variant, $expr)
+        arc_runtime::prelude::is!(@done $variant, $expr)
     };
 }
 
@@ -73,15 +73,15 @@ macro_rules! is {
 ///
 /// ```
 /// mod foo {
-///     #[arc_codegen::rewrite]
+///     #[arc_runtime::prelude::rewrite]
 ///     pub enum Bar {
 ///         Baz(i32),
 ///         Qux(i32)
 ///     }
 /// }
 ///
-/// let x = arc_codegen::enwrap!(foo::Bar::Baz, 5);
-/// let y = arc_codegen::unwrap!(foo::Bar::Baz, x);
+/// let x = arc_runtime::prelude::enwrap!(foo::Bar::Baz, 5);
+/// let y = arc_runtime::prelude::unwrap!(foo::Bar::Baz, x);
 /// ```
 #[macro_export]
 macro_rules! unwrap {
@@ -93,12 +93,12 @@ macro_rules! unwrap {
         }
     };
     ($mod:ident :: $enum:ident :: $variant:ident , $expr:expr) => {
-        arc_codegen::paste!(arc_codegen::unwrap!(@done $mod::[<Concrete $enum>]::$variant, $expr))
+        arc_runtime::prelude::paste!(arc_runtime::prelude::unwrap!(@done $mod::[<Concrete $enum>]::$variant, $expr))
     };
     ($enum:ident :: $variant:ident , $expr:expr) => {
-        arc_codegen::paste!(arc_codegen::unwrap!(@done [<Concrete $enum>]::$variant, $expr))
+        arc_runtime::prelude::paste!(arc_runtime::prelude::unwrap!(@done [<Concrete $enum>]::$variant, $expr))
     };
     ($variant:ident , $expr:expr) => {
-        arc_codegen::unwrap!(@done $variant, $expr)
+        arc_runtime::prelude::unwrap!(@done $variant, $expr)
     };
 }

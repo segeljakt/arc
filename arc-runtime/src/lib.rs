@@ -18,24 +18,25 @@ pub mod task;
 pub mod timer;
 
 pub mod prelude {
-    pub use crate::channels::local::broadcast::channel as local_broadcast_channel;
-    pub use crate::channels::local::broadcast::Pullable as LocalBroadcastPullable;
-    pub use crate::channels::local::broadcast::Pushable as LocalBroadcastPushable;
-    pub use crate::channels::local::concurrent::channel as local_concurrent_channel;
-    pub use crate::channels::local::concurrent::Pullable as LocalConcurrentPullable;
-    pub use crate::channels::local::concurrent::Pushable as LocalConcurrentPushable;
-    pub use crate::channels::local::keyed::channel as local_keyed_channel;
-    pub use crate::channels::local::keyed::Pullable as LocalKeyedPullable;
-    pub use crate::channels::local::keyed::Pushable as LocalKeyedPushable;
-    pub use crate::channels::remote::broadcast::channel as remote_broadcast_channel;
-    pub use crate::channels::remote::broadcast::Pullable as RemoteBroadcastPullable;
-    pub use crate::channels::remote::broadcast::Pushable as RemoteBroadcastPushable;
-    pub use crate::channels::remote::concurrent::channel as remote_concurrent_channel;
-    pub use crate::channels::remote::concurrent::Pullable as RemoteConcurrentPullable;
-    pub use crate::channels::remote::concurrent::Pushable as RemoteConcurrentPushable;
+    pub use crate::channels;
     pub use crate::control::Control;
     pub use crate::data::conversions::IntoSendable;
     pub use crate::data::conversions::IntoSharable;
+    pub use crate::data::primitives::bool;
+    pub use crate::data::primitives::char;
+    pub use crate::data::primitives::f32;
+    pub use crate::data::primitives::f64;
+    pub use crate::data::primitives::i128;
+    pub use crate::data::primitives::i16;
+    pub use crate::data::primitives::i32;
+    pub use crate::data::primitives::i64;
+    pub use crate::data::primitives::i8;
+    pub use crate::data::primitives::u128;
+    pub use crate::data::primitives::u16;
+    pub use crate::data::primitives::u32;
+    pub use crate::data::primitives::u64;
+    pub use crate::data::primitives::u8;
+    pub use crate::data::primitives::unit;
     pub use crate::data::Data;
     pub use crate::data::DateTime;
     pub use crate::data::Duration;
@@ -43,6 +44,18 @@ pub mod prelude {
     pub use crate::executor::Executor;
     pub use crate::task::message::TaskMessage;
 
+    // Macros
+    pub use crate::access;
+    pub use crate::enwrap;
+    pub use crate::fun_type;
+    pub use crate::fun_val;
+    pub use crate::is;
+    pub use crate::new;
+    pub use crate::unwrap;
+    pub use crate::val;
+    pub use macros::rewrite;
+
+    // Re-exports
     pub use kompact::prelude::info;
     pub use kompact::prelude::warn;
     pub use kompact::prelude::Actor;
@@ -62,4 +75,7 @@ pub mod prelude {
     pub use kompact::prelude::NetMessage;
     pub use kompact::prelude::NetworkConfig;
     pub use kompact::prelude::Never;
+
+    pub use derive_more;
+    pub use paste::paste;
 }
