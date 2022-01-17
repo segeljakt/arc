@@ -1,6 +1,8 @@
 #![allow(unused)]
 
+use crate::has_attr_key;
 use crate::new_id;
+use crate::split_name_type;
 
 use proc_macro as pm;
 use proc_macro2 as pm2;
@@ -9,28 +11,23 @@ use syn::parse::*;
 use syn::punctuated::Punctuated;
 use syn::token::Comma;
 
+/// ```no_run
 /// task id(a:Pullable[i32], b:Pullable[i32]): (c:Pushable[i32], d:Pushable[i32]) {
 ///     val x = receive a;
 ///     val y = receive b;
 ///     c ! x;
 ///     d ! y;
 /// }
+/// ```
 ///
 /// Becomes
 ///
 /// ```no_run
-/// #[rewrite]
+/// #[rewrite(impersistent)]
 /// mod my_task {
-///     fn task(
-///         a:Pullable<i32>,
-///         b:Pullable<i32>,
-///         #[output] c:Pushable<i32>,
-///         #[output] d:Pushable<i32>
-///     ) {
+///     fn task(a:Pullable<i32>, #[output] b:Pushable<i32>) {
 ///         let x = pull!(a);
-///         let y = pull!(b);
-///         push!(c, x);
-///         push!(d, y);
+///         push!(b, x);
 ///     }
 /// }
 /// ```
@@ -58,9 +55,6 @@ pub(crate) fn rewrite(attr: syn::AttributeArgs, item: syn::ItemMod) -> pm::Token
             syn::FnArg::Typed(p) => !has_attr_key("output", &p.attrs),
         });
 
-    //     println!("INPUTS {:?}", iparams);
-    //     println!("OUTPUTS {:?}", oparams);
-
     let (iparam_name, iparam_type): (Vec<_>, Vec<_>) = split_name_type(iparams);
     let (oparam_name, oparam_type): (Vec<_>, Vec<_>) = split_name_type(oparams);
 
@@ -74,13 +68,11 @@ pub(crate) fn rewrite(attr: syn::AttributeArgs, item: syn::ItemMod) -> pm::Token
         .map(|ty| quote!(<#ty as Channel>::Pullable))
         .collect::<Vec<_>>();
 
-    //     println!("{:?}", oparam_pull_name);
-    //     println!("{:?}", oparam_pull_type);
-
     quote!(
         use #mod_name::#task_name;
         #[allow(clippy::all)]
         #[allow(non_snake_case)]
+        #[allow(unreachable_code)]
         pub mod #mod_name {
             use arc_runtime::prelude::*;
             use arc_runtime::channels::local::concurrent::{Pushable, Pullable};
@@ -97,10 +89,10 @@ pub(crate) fn rewrite(attr: syn::AttributeArgs, item: syn::ItemMod) -> pm::Token
             // not safely sendable. The code generator is required to generate thread-safe code.
             unsafe impl Send for Task {}
 
-            pub fn #task_name(#(#iparam_name: #iparam_type,)*) -> (#(#oparam_pull_type,)*) {
+            pub fn #task_name(#(#iparam_name: #iparam_type,)*) -> (#(#oparam_pull_type),*) {
                 #(let (#oparam_name, #oparam_pull_name) = <#oparam_type as Channel>::channel(&EXECUTOR);)*
                 EXECUTOR.create_task(move || Task::new(#(#iparam_name,)* #(#oparam_name,)*));
-                (#(#oparam_pull_name,)*)
+                (#(#oparam_pull_name),*)
             }
 
             impl Task {
@@ -115,6 +107,7 @@ pub(crate) fn rewrite(attr: syn::AttributeArgs, item: syn::ItemMod) -> pm::Token
                 }
 
                 async fn run(async_self: ComponentDefinitionAccess<Self>) -> Control<()> {
+                    let log = async_self.log().clone();
                     #(let #iparam_name = async_self.#iparam_name.clone();)*
                     #(let #oparam_name = async_self.#oparam_name.clone();)*
                     #task_body
@@ -148,7 +141,7 @@ pub(crate) fn rewrite(attr: syn::AttributeArgs, item: syn::ItemMod) -> pm::Token
                 type Message = TaskMessage;
 
                 fn receive_local(&mut self, _: Self::Message) -> Handled {
-                    todo!()
+                    Handled::Ok
                 }
 
                 fn receive_network(&mut self, _: NetMessage) -> Handled {
@@ -166,10 +159,6 @@ pub(crate) fn rewrite(attr: syn::AttributeArgs, item: syn::ItemMod) -> pm::Token
                 }
             }
 
-            use std::any::Any;
-            use std::any::TypeId;
-            use std::sync::Arc;
-
             impl DynamicPortAccess for Task {
                 fn get_provided_port_as_any(&mut self, _: TypeId) -> Option<&mut dyn Any> {
                     unreachable!();
@@ -182,71 +171,4 @@ pub(crate) fn rewrite(attr: syn::AttributeArgs, item: syn::ItemMod) -> pm::Token
         }
     )
     .into()
-}
-
-fn poll_port(
-    on_event: &pm2::TokenStream,
-    treshold: pm2::TokenStream,
-    skip: pm2::TokenStream,
-    port: &syn::Ident,
-) -> pm2::TokenStream {
-    quote! {
-        if skip <= #treshold {
-            if count >= max_events {
-                return ExecuteResult::new(false, count, #skip);
-            }
-        }
-        if let Some(event) = self.#port.dequeue() {
-            let res = #on_event;
-            count += 1;
-            done_work = true;
-            if let Handled::BlockOn(blocking_future) = res {
-                self.ctx_mut().set_blocking(blocking_future);
-                return ExecuteResult::new(true, count, #skip);
-            }
-        }
-    }
-}
-
-fn future(future: Option<syn::Type>) -> pm2::TokenStream {
-    if let Some(ty) = future {
-        quote! {}
-    } else {
-        quote! {}
-    }
-}
-
-fn get_attr_val(name: &str, attr: &[syn::NestedMeta]) -> syn::Ident {
-    attr.iter()
-        .find_map(|arg| match arg {
-            syn::NestedMeta::Meta(meta) => match meta {
-                syn::Meta::NameValue(nv) if nv.path.is_ident(name) => match &nv.lit {
-                    syn::Lit::Str(x) => {
-                        Some(x.parse().expect("Expected attr value to be an identifier"))
-                    }
-                    _ => None,
-                },
-                _ => None,
-            },
-            syn::NestedMeta::Lit(lit) => None,
-        })
-        .unwrap_or_else(|| panic!("`{} = <id>` missing from identifiers", name))
-}
-
-fn has_attr_key(name: &str, attr: &[syn::Attribute]) -> bool {
-    attr.iter()
-        .any(|a| matches!(a.parse_meta(), Ok(syn::Meta::Path(x)) if x.is_ident(name)))
-}
-
-fn split_name_type(params: Vec<syn::FnArg>) -> (Vec<syn::Ident>, Vec<syn::Type>) {
-    params
-        .into_iter()
-        .map(|p| match p {
-            syn::FnArg::Receiver(_) => unreachable!(),
-            syn::FnArg::Typed(p) => match *p.pat {
-                syn::Pat::Ident(i) => (i.ident, *p.ty),
-                _ => unreachable!(),
-            },
-        })
-        .unzip()
 }

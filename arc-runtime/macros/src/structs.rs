@@ -43,7 +43,7 @@ pub(crate) fn rewrite(_: syn::AttributeArgs, struct_item: syn::ItemStruct) -> pm
     quote!(
 
         pub mod #sharable_mod_id {
-            #[derive(Clone, Debug, arc_runtime::prelude::derive_more::Deref)]
+            #[derive(Clone, Debug, arc_runtime::prelude::Deref)]
             pub struct #abstract_id(pub std::rc::Rc<#concrete_id>);
 
             impl From<#concrete_id> for #abstract_id {
@@ -58,7 +58,7 @@ pub(crate) fn rewrite(_: syn::AttributeArgs, struct_item: syn::ItemStruct) -> pm
 
         mod #sendable_mod_id {
 
-            #[derive(Clone, Debug, arc_runtime::prelude::derive_more::Deref)]
+            #[derive(Clone, Debug, arc_runtime::prelude::Deref)]
             pub struct #abstract_id(pub Box<#concrete_id>);
 
             // Concrete to Abstract

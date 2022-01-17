@@ -9,8 +9,9 @@ macro_rules! compile_test {
         static EXECUTOR: Executor = Executor::new();
 
         #[derive(ComponentDefinition)]
-        struct Source<I: IntoIterator<Item = T> + Data, T: Data>
+        struct Source<I: Data, T: Data>
         where
+            I: IntoIterator<Item = T>,
             <I as IntoIterator>::IntoIter: Data,
         {
             ctx: ComponentContext<Self>,
@@ -32,8 +33,9 @@ macro_rules! compile_test {
             pullable: $($mod)::+::Pullable<T>,
         }
 
-        impl<I: IntoIterator<Item = T> + Data, T: Data> Source<I, T>
+        impl<I: Data, T: Data> Source<I, T>
         where
+            I: IntoIterator<Item = T>,
             <I as IntoIterator>::IntoIter: Data,
         {
             fn new(iter: I, pushable: $($mod)::+::Pushable<T>) -> Self {
@@ -88,8 +90,9 @@ macro_rules! compile_test {
             }
         }
 
-        impl<I: IntoIterator<Item = T> + Data, T: Data> ComponentLifecycle for Source<I, T>
+        impl<I: Data, T: Data> ComponentLifecycle for Source<I, T>
         where
+            I: IntoIterator<Item = T>,
             <I as IntoIterator>::IntoIter: Data,
         {
             fn on_start(&mut self) -> Handled {
@@ -121,8 +124,9 @@ macro_rules! compile_test {
             }
         }
 
-        impl<I: IntoIterator<Item = T> + Data, T: Data> Actor for Source<I, T>
+        impl<I: Data, T: Data> Actor for Source<I, T>
         where
+            I: IntoIterator<Item = T>,
             <I as IntoIterator>::IntoIter: Data,
         {
             type Message = TaskMessage;
@@ -160,10 +164,9 @@ macro_rules! compile_test {
             }
         }
 
-        fn source<I, T>(i: I) -> $($mod)::+::Pullable<T>
+        fn source<I: Data, T: Data>(i: I) -> $($mod)::+::Pullable<T>
         where
-            I: IntoIterator<Item = T> + Data,
-            T: Data,
+            I: IntoIterator<Item = T>,
             <I as IntoIterator>::IntoIter: Data,
         {
             let (o0, o1) = $($mod)::+::channel(&EXECUTOR);
@@ -171,20 +174,13 @@ macro_rules! compile_test {
             o1
         }
 
-        fn map<A, B>(a: $($mod)::+::Pullable<A>, f: fn(A) -> B) -> $($mod)::+::Pullable<B>
-        where
-            A: Data,
-            B: Data,
-        {
+        fn map<A: Data, B: Data>(a: $($mod)::+::Pullable<A>, f: fn(A) -> B) -> $($mod)::+::Pullable<B> {
             let (b0, b1) = $($mod)::+::channel(&EXECUTOR);
             EXECUTOR.create_task(move || Map::new(a, f, b0));
             b1
         }
 
-        fn log<T>(a: $($mod)::+::Pullable<T>)
-        where
-            T: Data,
-        {
+        fn log<T: Data>(a: $($mod)::+::Pullable<T>) {
             EXECUTOR.create_task(move || Log::new(a));
         }
 
@@ -195,28 +191,24 @@ macro_rules! compile_test {
         #[test]
         fn main() {
             EXECUTOR.init(KompactConfig::default().build().unwrap());
-            {
-                let s = source(0..100);
-                let s = map(s, plus_one);
-                let _ = log(s);
-            }
+            log(map(source(0..100), plus_one));
             EXECUTOR.await_termination();
         }
     }
 }
 
-mod test1 {
-    compile_test!(arc_runtime::channels::remote::concurrent);
-}
-//
-// mod test2 {
+// mod source_map_log_remote_concurrent {
+//     compile_test!(arc_runtime::channels::remote::concurrent);
+// }
+
+// mod source_map_log_remote_broadcast {
 //     compile_test!(arc_runtime::channels::remote::broadcast);
 // }
 //
-// mod test3 {
-//     compile_test!(arc_runtime::channels::local::concurrent);
-// }
+mod source_map_log_local_concurrent {
+    compile_test!(arc_runtime::channels::local::concurrent);
+}
 //
-// mod test4 {
+// mod source_map_log_local_broadcast {
 //     compile_test!(arc_runtime::channels::local::broadcast);
 // }

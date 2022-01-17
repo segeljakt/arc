@@ -28,3 +28,5 @@ erased-serde                  = { version = "0.3.17" }
 crossfire                     = { version = "0.1.7" }
 tokio                         = { version = "1.15.0", features = ["sync"] }
 derive_more                   = { version = "0.99.17", default-features = false, features = ["from", "into", "deref", "deref_mut", "constructor"] }
+futures                       = { version = "0.3.19" }
+replace_with                  = { version = "0.1.7" }

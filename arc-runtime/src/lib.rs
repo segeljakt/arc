@@ -16,9 +16,11 @@ pub mod executor;
 pub mod gc;
 pub mod task;
 pub mod timer;
+pub mod logging;
 
 pub mod prelude {
     pub use crate::channels;
+    pub use crate::channels::Channel;
     pub use crate::control::Control;
     pub use crate::data::conversions::IntoSendable;
     pub use crate::data::conversions::IntoSharable;
@@ -50,7 +52,10 @@ pub mod prelude {
     pub use crate::fun_type;
     pub use crate::fun_val;
     pub use crate::is;
+    pub use crate::log;
     pub use crate::new;
+    pub use crate::pull;
+    pub use crate::push;
     pub use crate::unwrap;
     pub use crate::val;
     pub use macros::rewrite;
@@ -76,6 +81,19 @@ pub mod prelude {
     pub use kompact::prelude::NetworkConfig;
     pub use kompact::prelude::Never;
 
-    pub use derive_more;
+    pub use derive_more::Constructor as New;
+    pub use derive_more::Deref;
+    pub use derive_more::From;
+    pub use futures::future::BoxFuture;
+    pub use futures::future::FutureExt;
     pub use paste::paste;
+    pub use replace_with::replace_with_or_abort_and_return;
+
+    pub use std::any::Any;
+    pub use std::any::TypeId;
+    pub use std::future::Future;
+    pub use std::pin::Pin;
+    pub use std::sync::Arc;
+    pub use std::task::Context as PollContext;
+    pub use std::task::Poll;
 }

@@ -43,8 +43,8 @@ impl Executor {
     }
 
     pub fn init(&self, system: KompactSystem) {
-        let (actor, path) = system.create_and_register(ExecutorActor::new);
-        self.actor.set(actor);
+//         let (actor, path) = system.create_and_register(ExecutorActor::new);
+//         self.actor.set(actor);
         assert!(self.system.set(system).is_ok())
     }
 

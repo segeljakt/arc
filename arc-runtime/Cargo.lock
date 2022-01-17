@@ -49,12 +49,14 @@ dependencies = [
  "derive_more",
  "dyn-clone",
  "erased-serde",
+ "futures",
  "hierarchical_hash_wheel_timer",
  "kompact",
  "lazy_static",
  "macros",
  "paste",
  "rand 0.8.4",
+ "replace_with",
  "slog",
  "time 0.2.26",
  "tokio",
@@ -1555,6 +1557,12 @@ name = "regex-syntax"
 version = "0.6.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "24d5f089152e60f62d28b835fbff2cd2e8dc0baf1ac13343bef92ab7eed84548"
+
+[[package]]
+name = "replace_with"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e3a8614ee435691de62bcffcf4a66d91b3594bf1428a5722e79103249a095690"
 
 [[package]]
 name = "rosalloc"
