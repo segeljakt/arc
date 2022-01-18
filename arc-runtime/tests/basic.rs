@@ -26,7 +26,6 @@ impl Actor for DoThing {
     fn receive_network(&mut self, msg: kompact::prelude::NetMessage) -> Handled {
         Handled::Ok
     }
-
 }
 
 impl DoThing {
@@ -61,6 +60,7 @@ impl ComponentLifecycle for DoThing {
             async_self.run().await;
             Handled::DieNow
         });
+        futures::task::waker_ref(&self.ctx.typed_component());
         Handled::Ok
     }
 }

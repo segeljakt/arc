@@ -39,7 +39,7 @@ pub(crate) fn rewrite(attr: syn::AttributeArgs, item: syn::ItemMod) -> pm::Token
 
     let items = item.content.expect("Expected module to contain items").1;
 
-    let state = items
+    let mut state = items
         .iter()
         .filter_map(|item| match item {
             syn::Item::Struct(item) => Some(item),
@@ -123,6 +123,7 @@ pub(crate) fn rewrite(attr: syn::AttributeArgs, item: syn::ItemMod) -> pm::Token
                     type Output = ();
 
                     fn poll(self: Pin<&mut Self>, cx: &mut PollContext) -> Poll<Self::Output> {
+                        cx.waker().clone().wake();
                         replace_with_or_abort_and_return(self.get_mut(), |async_self| transition(async_self, cx))
                     }
                 }

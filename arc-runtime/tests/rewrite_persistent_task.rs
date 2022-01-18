@@ -35,15 +35,18 @@ mod map {
         push: BoxFuture<'static, Control<()>>,
     }
 
+    struct State3 {}
+
     enum State {
         State0(State0),
         State1(State1),
         State2(State2),
+        State3(State3),
     }
 
     fn transition0(State0 { a, b, f }: State0, _cx: &mut PollContext) -> (Poll<()>, State) {
-        let pull = a.pull().boxed();
-        let pull = unsafe { std::mem::transmute(pull) };
+        let tmp = a.clone();
+        let pull = async move { tmp.pull().await }.boxed();
         (Poll::Pending, State1 { a, b, f, pull }.into())
     }
 
@@ -51,12 +54,14 @@ mod map {
         State1 { a, b, f, mut pull }: State1,
         cx: &mut PollContext,
     ) -> (Poll<()>, State) {
-        if let Poll::Ready(Control::Continue(x)) = pull.as_mut().poll(cx) {
-            let push = b.push(x).boxed();
-            let push = unsafe { std::mem::transmute(push) };
-            (Poll::Pending, State2 { a, b, f, push }.into())
-        } else {
-            (Poll::Pending, State1 { a, b, f, pull }.into())
+        match pull.as_mut().poll(cx) {
+            Poll::Ready(Control::Continue(x)) => {
+                let tmp = b.clone();
+                let push = async move { tmp.push(x).await }.boxed();
+                (Poll::Pending, State2 { a, b, f, push }.into())
+            },
+            Poll::Ready(Control::Finished) => (Poll::Ready(()), State3 {}.into()),
+            Poll::Pending => (Poll::Pending, State1 { a, b, f, pull }.into()),
         }
     }
 
@@ -64,11 +69,15 @@ mod map {
         State2 { a, b, f, mut push }: State2,
         cx: &mut PollContext,
     ) -> (Poll<()>, State) {
-        if let Poll::Ready(Control::Continue(())) = push.as_mut().poll(cx) {
-            (Poll::Pending, State0 { a, b, f }.into())
-        } else {
-            (Poll::Pending, State2 { a, b, f, push }.into())
+        match push.as_mut().poll(cx) {
+            Poll::Ready(Control::Continue(())) => (Poll::Pending, State0 { a, b, f }.into()),
+            Poll::Ready(Control::Finished) => (Poll::Ready(()), State3 {}.into()),
+            Poll::Pending => (Poll::Pending, State2 { a, b, f, push }.into()),
         }
+    }
+
+    fn transition3(State3 {}: State3, _cx: &mut PollContext) -> (Poll<()>, State) {
+        unreachable!()
     }
 }
 
@@ -76,7 +85,7 @@ mod map {
 mod log {
     fn task(i: Pullable<i32>) {
         loop {
-            println!("Logging {}", pull!(i));
+            info!(log, "Logging {}", pull!(i));
         }
     }
 }
