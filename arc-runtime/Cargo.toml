@@ -3,7 +3,7 @@ name        = "arc-runtime"
 version     = "0.0.0"
 authors     = ["Klas Segeljakt <klasseg@kth.se>"]
 edition     = "2018"
-description = "A native runtime for arc"
+description = "A runtime for arc-lang"
 
 [lib]
 name = "arc_runtime"
@@ -11,22 +11,23 @@ path = "src/lib.rs"
 
 [dependencies]
 macros                        = { path = "./macros" }
-kompact                       = { git = "https://github.com/segeljakt/kompact", features = ["type_erasure"] }
+kompact                       = { git = "https://github.com/segeljakt/kompact", branch = "master", features = ["type_erasure"] }
 paste                         = { version = "1.0.5" }
 slog                          = { version = "2.7.0" }
 coz                           = { version = "0.1.3" }
-time                          = { version = "0.2.26", features = ["rand", "deprecated"] }
+time                          = { version = "0.3.5", features = ["rand", "macros"] }
 arrayvec                      = { version = "0.7.0" }
-hierarchical_hash_wheel_timer = { version = "1.0.0" }
+hierarchical_hash_wheel_timer = { version = "1.1.0" }
 uuid                          = { version = "0.8.2" }
 rand                          = { version = "0.8.3" }
 dyn-clone                     = { version = "1.0.4" }
 lazy_static                   = { version = "1.4.0" }
 async-recursion               = { version = "0.3.2" }
-comet                         = { git = "https://github.com/Starlight-JS/comet", branch = "multi-threaded" }
+comet                         = { git = "https://github.com/Starlight-JS/comet", branch = "multi-threaded", package = "comet-extra" }
 erased-serde                  = { version = "0.3.17" }
 crossfire                     = { version = "0.1.7" }
 tokio                         = { version = "1.15.0", features = ["sync"] }
 derive_more                   = { version = "0.99.17", default-features = false, features = ["from", "into", "deref", "deref_mut", "constructor"] }
 futures                       = { version = "0.3.19" }
 replace_with                  = { version = "0.1.7" }
+hexf                          = { version = "0.2.1" }

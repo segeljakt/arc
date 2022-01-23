@@ -45,35 +45,23 @@ mod map {
     }
 
     fn transition0(State0 { a, b, f }: State0, _cx: &mut PollContext) -> (Poll<()>, State) {
-        let tmp = a.clone();
-        let pull = async move { tmp.pull().await }.boxed();
-        (Poll::Pending, State1 { a, b, f, pull }.into())
+        pull_transition!(pull, a, State1 { a, b, f, pull });
     }
 
     fn transition1(
         State1 { a, b, f, mut pull }: State1,
         cx: &mut PollContext,
     ) -> (Poll<()>, State) {
-        match pull.as_mut().poll(cx) {
-            Poll::Ready(Control::Continue(x)) => {
-                let tmp = b.clone();
-                let push = async move { tmp.push(x).await }.boxed();
-                (Poll::Pending, State2 { a, b, f, push }.into())
-            },
-            Poll::Ready(Control::Finished) => (Poll::Ready(()), State3 {}.into()),
-            Poll::Pending => (Poll::Pending, State1 { a, b, f, pull }.into()),
-        }
+        let x = wait!(pull, cx, State1 { a, b, f, pull }, State3 {});
+        push_transition!(push, b, f(x), State2 { a, b, f, push });
     }
 
     fn transition2(
         State2 { a, b, f, mut push }: State2,
         cx: &mut PollContext,
     ) -> (Poll<()>, State) {
-        match push.as_mut().poll(cx) {
-            Poll::Ready(Control::Continue(())) => (Poll::Pending, State0 { a, b, f }.into()),
-            Poll::Ready(Control::Finished) => (Poll::Ready(()), State3 {}.into()),
-            Poll::Pending => (Poll::Pending, State2 { a, b, f, push }.into()),
-        }
+        wait!(push, cx, State2 { a, b, f, push }, State0 { a, b, f });
+        transition!(State0 { a, b, f });
     }
 
     fn transition3(State3 {}: State3, _cx: &mut PollContext) -> (Poll<()>, State) {

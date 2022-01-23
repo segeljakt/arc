@@ -17,7 +17,7 @@ impl<T: Data> Clone for Pullable<T> {
     }
 }
 
-crate::impl_channel!();
+crate::channels::impl_channel!();
 
 /// TODO: Processing will currently only stop if all pullers are dropped.
 pub fn channel<T: Data>(_: &KompactSystem) -> (Pushable<T>, Pullable<T>) {

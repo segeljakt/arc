@@ -31,7 +31,7 @@ pub(crate) fn rewrite(_: syn::AttributeArgs, struct_item: syn::ItemStruct) -> pm
         .iter_mut()
         .for_each(|f| {
             let ty = f.ty.clone();
-            f.ty = syn::parse_quote!(<super::#ty as arc_runtime::prelude::IntoSendable>::T);
+            f.ty = syn::parse_quote!(<super::#ty as IntoSendable>::T);
         });
 
     let field_id = concrete_sendable_struct_item
@@ -42,53 +42,71 @@ pub(crate) fn rewrite(_: syn::AttributeArgs, struct_item: syn::ItemStruct) -> pm
 
     quote!(
 
+        use arc_runtime::prelude::*;
         pub mod #sharable_mod_id {
-            #[derive(Clone, Debug, arc_runtime::prelude::Deref)]
-            pub struct #abstract_id(pub std::rc::Rc<#concrete_id>);
+            use arc_runtime::prelude::*;
 
-            impl From<#concrete_id> for #abstract_id {
-                fn from(v: #concrete_id) -> Self {
-                    Self(std::rc::Rc::new(v))
+            #[derive(Clone, Debug, From, Deref)]
+            pub struct #abstract_id(pub Gc<#concrete_id>);
+
+            impl Alloc<#abstract_id> for #concrete_id {
+                fn alloc(self, ctx: &mut Context) -> #abstract_id {
+                    #abstract_id(ctx.mutator.allocate(self, AllocationSpace::New))
                 }
             }
 
             #[derive(Clone, Debug)]
             #concrete_sharable_struct_item
+
+            impl Collectable for #abstract_id {}
+            unsafe impl Finalize for #abstract_id {}
+            unsafe impl Trace for #abstract_id {
+                fn trace(&mut self, vis: &mut dyn Visitor) {
+                    self.0.trace(vis);
+                }
+            }
+
+            impl Collectable for #concrete_id {}
+            unsafe impl Finalize for #concrete_id {}
+            unsafe impl Trace for #concrete_id {
+                fn trace(&mut self, vis: &mut dyn Visitor) {
+                    #(self.#field_id.trace(vis);)*
+                }
+            }
+            unsafe impl Send for #abstract_id {}
+            unsafe impl Sync for #abstract_id {}
+            impl Unpin for #abstract_id {}
         }
 
         mod #sendable_mod_id {
+            use arc_runtime::prelude::*;
 
-            #[derive(Clone, Debug, arc_runtime::prelude::Deref)]
+            #[derive(Clone, Debug, Deref, From)]
+            #[from(forward)]
             pub struct #abstract_id(pub Box<#concrete_id>);
-
-            // Concrete to Abstract
-            impl From<#concrete_id> for #abstract_id {
-                fn from(v: #concrete_id) -> Self {
-                    Self(Box::new(v))
-                }
-            }
 
             #[derive(Clone, Debug)]
             #concrete_sendable_struct_item
         }
 
-        use #sharable_mod_id::{#abstract_id, #concrete_id};
+        use #sharable_mod_id::#abstract_id;
+        use #sharable_mod_id::#concrete_id;
 
-        impl arc_runtime::prelude::IntoSendable for #sharable_mod_id::#abstract_id {
+        impl IntoSendable for #sharable_mod_id::#abstract_id {
             type T = #sendable_mod_id::#abstract_id;
-            fn into_sendable(self) -> Self::T {
+            fn into_sendable(self, ctx: &mut Context) -> Self::T {
                 #sendable_mod_id::#concrete_id {
-                    #(#field_id: self.0.as_ref().#field_id.clone().into_sendable()),*
+                    #(#field_id: self.0.#field_id.clone().into_sendable(ctx)),*
                 }.into()
             }
         }
 
-        impl arc_runtime::prelude::IntoSharable for #sendable_mod_id::#abstract_id {
+        impl IntoSharable for #sendable_mod_id::#abstract_id {
             type T = #sharable_mod_id::#abstract_id;
-            fn into_sharable(self) -> Self::T {
+            fn into_sharable(self, ctx: &mut Context) -> Self::T {
                 #sharable_mod_id::#concrete_id {
-                    #(#field_id: self.0.#field_id.into_sharable()),*
-                }.into()
+                    #(#field_id: self.0.#field_id.into_sharable(ctx)),*
+                }.alloc(ctx)
             }
         }
     )

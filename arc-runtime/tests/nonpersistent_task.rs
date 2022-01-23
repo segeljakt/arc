@@ -11,6 +11,7 @@ mod source {
     }
 }
 
+
 #[rewrite(nonpersistent)]
 mod map {
     fn task(i: Pullable<i32>, f: fn(i32) -> i32, #[output] o: Pushable<i32>) {

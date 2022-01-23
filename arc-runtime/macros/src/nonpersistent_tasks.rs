@@ -75,7 +75,7 @@ pub(crate) fn rewrite(attr: syn::AttributeArgs, item: syn::ItemMod) -> pm::Token
         #[allow(unreachable_code)]
         pub mod #mod_name {
             use arc_runtime::prelude::*;
-            use arc_runtime::channels::local::concurrent::{Pushable, Pullable};
+            use arc_runtime::channels::local::task_parallel::{Pushable, Pullable};
             use super::*;
 
             struct Task {
@@ -100,7 +100,7 @@ pub(crate) fn rewrite(attr: syn::AttributeArgs, item: syn::ItemMod) -> pm::Token
                 fn new(#(#iparam_name: #iparam_type,)* #(#oparam_name: #oparam_type,)*) -> Self {
                     Self {
                         ctx: ComponentContext::uninitialised(),
-                        event_time: DateTime::unix_epoch(),
+                        event_time: DateTime::new(date!(1970-01-01), time!(0:0:0)),
                         #(#iparam_name,)*
                         #(#oparam_name,)*
                     }

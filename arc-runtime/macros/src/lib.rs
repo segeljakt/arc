@@ -2,9 +2,11 @@ use proc_macro::TokenStream;
 use proc_macro2 as pm2;
 
 mod enums;
+mod functions;
 mod nonpersistent_tasks;
 mod persistent_tasks;
 mod structs;
+mod main_function;
 
 /// Declares a new enum which is compatible with the `codegen::{enwrap, unwrap, is}` API.
 ///
@@ -20,12 +22,16 @@ pub fn rewrite(attr: TokenStream, input: TokenStream) -> TokenStream {
     match item {
         syn::Item::Enum(item) => enums::rewrite(attr, item),
         syn::Item::Struct(item) => structs::rewrite(attr, item),
-        syn::Item::Mod(item) if has_meta_key("nonpersistent", &get_attrs(&attr)) => {
+        syn::Item::Mod(item) if has_meta_key("nonpersistent", &get_metas(&attr)) => {
             nonpersistent_tasks::rewrite(attr, item)
         }
-        syn::Item::Mod(item) if has_meta_key("persistent", &get_attrs(&attr)) => {
+        syn::Item::Mod(item) if has_meta_key("persistent", &get_metas(&attr)) => {
             persistent_tasks::rewrite(attr, item)
         }
+        syn::Item::Fn(item) if has_meta_key("main", &get_metas(&attr)) => {
+            main_function::rewrite(attr, item)
+        }
+        syn::Item::Fn(item) => functions::rewrite(attr, item),
         _ => panic!(
             "{}",
             format!(
@@ -42,7 +48,7 @@ pub(crate) fn new_id(s: impl ToString) -> syn::Ident {
     syn::Ident::new(&s.to_string(), pm2::Span::call_site())
 }
 
-pub(crate) fn get_attrs(attr: &[syn::NestedMeta]) -> Vec<syn::Meta> {
+pub(crate) fn get_metas(attr: &[syn::NestedMeta]) -> Vec<syn::Meta> {
     attr.into_iter()
         .filter_map(|a| match a {
             syn::NestedMeta::Meta(m) => Some(m.clone()),

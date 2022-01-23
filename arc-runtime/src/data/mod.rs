@@ -1,19 +1,38 @@
+pub mod alloc;
 pub mod conversions;
-pub mod enums;
-pub mod functions;
 pub mod primitives;
 pub mod strings;
-pub mod structs;
-pub mod values;
+pub mod vectors;
 
+use crate::data::conversions::IntoSendable;
+use crate::data::conversions::IntoSharable;
 use comet::api::Collectable;
-pub use time::PrimitiveDateTime as DateTime;
-pub use time::Duration;
+use comet::api::Finalize;
+use comet::api::Trace;
+use comet::gc_base::GcBase;
 
-/// Trait requirements for sending data.
-pub trait Data: 'static + Send + std::fmt::Debug + Clone + Unpin {}
-impl<T> Data for T where T: 'static + Send + std::fmt::Debug + Clone + Unpin {}
+use std::fmt::Debug;
+use std::hash::Hash;
+
+pub trait Data:
+    'static + Send + Sync + Clone + Debug + Unpin + IntoSendable + Collectable + Finalize + Trace
+{
+}
+
+impl<T> Data for T where
+    T: 'static
+        + Send
+        + Sync
+        + Clone
+        + Debug
+        + Unpin
+        + IntoSendable
+        + Collectable
+        + Finalize
+        + Trace
+{
+}
 
 /// Trait requirements for keying data.
-pub trait Key: Data + std::hash::Hash {}
-impl<T> Key for T where T: Data + std::hash::Hash {}
+pub trait Key: Data + Hash {}
+impl<T> Key for T where T: Data + Hash {}

@@ -14,7 +14,7 @@ pub struct Pushable<T: Data>(TxFuture<T, SharedFutureBoth>);
 #[derive(Clone)]
 pub struct Pullable<T: Data>(RxFuture<T, SharedFutureBoth>);
 
-crate::impl_channel!();
+crate::channels::impl_channel!();
 
 pub fn channel<T: Data>(_: &KompactSystem) -> (Pushable<T>, Pullable<T>) {
     let (tx, rx) = crossfire::mpmc::bounded_future_both(100);

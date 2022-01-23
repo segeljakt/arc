@@ -12,9 +12,9 @@ use std::task::Poll;
 use futures::future::BoxFuture;
 use futures::FutureExt;
 
-use channels::local::concurrent::channel;
-use channels::local::concurrent::Pullable;
-use channels::local::concurrent::Pushable;
+use channels::local::task_parallel::channel;
+use channels::local::task_parallel::Pullable;
+use channels::local::task_parallel::Pushable;
 
 enum State {
     State0 {

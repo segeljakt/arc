@@ -2,7 +2,7 @@
 #![allow(unreachable_code)]
 #![allow(unused_variables)]
 #![feature(arbitrary_self_types)]
-use arc_runtime::channels::local::concurrent::*;
+use arc_runtime::channels::local::task_parallel::*;
 use arc_runtime::prelude::*;
 
 // Note: This may only be used by the main thread.

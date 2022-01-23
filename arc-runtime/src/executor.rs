@@ -1,7 +1,4 @@
-use crate::channels::local::broadcast as lbc;
-use crate::channels::local::concurrent as lcc;
-use crate::channels::remote::broadcast as rbc;
-use crate::channels::remote::concurrent as rcc;
+use crate::channels;
 use crate::data::Data;
 use crate::task::message::TaskMessage;
 

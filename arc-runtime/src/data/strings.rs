@@ -1,59 +1,105 @@
-use crate::data::conversions::IntoSendable;
-use crate::data::conversions::IntoSharable;
+use crate::prelude::*;
 
-pub mod sharable_string {
-    use derive_more::Deref;
-    use derive_more::From;
+pub mod sharable {
+    use crate::prelude::*;
 
-    #[derive(From, Deref)]
+    #[derive(Clone, From, Deref, DerefMut, Debug)]
     #[from(forward)]
-    pub struct String(pub std::rc::Rc<str>);
+    pub struct String(pub Gc<ConcreteString>);
+
+    pub type ConcreteString = comet::alloc::string::String<MiniMark>;
+
+    impl Alloc<String> for ConcreteString {
+        fn alloc(self, ctx: &mut Context) -> String {
+            String(ctx.mutator.allocate(self, AllocationSpace::New))
+        }
+    }
+
+    unsafe impl Trace for String {
+        fn trace(&mut self, vis: &mut dyn Visitor) {
+            self.0.trace(vis)
+        }
+    }
+
+    impl Collectable for String {}
+    unsafe impl Finalize for String {}
+    unsafe impl Send for String {}
+    unsafe impl Sync for String {}
+    impl Unpin for String {}
 }
 
-mod sendable_string {
-    use derive_more::Deref;
-    use derive_more::From;
+mod sendable {
+    use crate::prelude::*;
 
-    #[derive(From, Deref)]
+    #[derive(From)]
     #[from(forward)]
-    pub struct String(pub Box<str>);
+    pub struct String(pub ConcreteString);
+
+    pub type ConcreteString = Box<str>;
+
+    unsafe impl Send for String {}
 }
 
-impl IntoSendable for sharable_string::String {
-    type T = sendable_string::String;
-    fn into_sendable(self) -> Self::T {
-        self.0.as_ref().into()
+impl IntoSendable for sharable::String {
+    type T = sendable::String;
+    fn into_sendable(self, ctx: &mut Context) -> Self::T {
+        self.0.to_string().into()
     }
 }
 
-impl IntoSharable for sendable_string::String {
-    type T = sharable_string::String;
-    fn into_sharable(self) -> Self::T {
-        self.0.into()
+impl IntoSharable for sendable::String {
+    type T = sharable::String;
+    fn into_sharable(self, ctx: &mut Context) -> Self::T {
+        String::from_str(self.0.as_ref(), ctx)
     }
 }
 
-use sharable_string::String;
+pub use sharable::String;
 
 impl String {
-    /// Concatenates `self` with `other`.
-    pub fn concat(self, other: Self) -> Self {
-        vec![self.as_ref(), other.as_ref()].join("").into()
+    pub fn new(ctx: &mut Context) -> String {
+        sharable::ConcreteString::new(&mut ctx.mutator).alloc(ctx)
     }
-    /// Appends `ch` to `self`.
-    pub fn append(self, ch: char) -> Self {
-        let mut new = self.as_ref().to_string();
-        new.push(ch);
-        new.into()
+
+    pub fn with_capacity(capacity: usize, ctx: &mut Context) -> String {
+        sharable::ConcreteString::with_capacity(&mut ctx.mutator, capacity).alloc(ctx)
     }
-    /// Returns `true` if `self` contains `other` substring, else `false`.
-    pub fn contains(self, other: Self) -> bool {
-        self.0.contains(other.as_ref())
+
+    pub fn push(mut self, ch: char, ctx: &mut Context) {
+        self.0.push(&mut ctx.mutator, ch)
     }
-    /// Returns `true` if `self` contains `other` substring, else `false`.
-    pub fn truncate(self, new_len: usize) -> String {
-        let mut new = self.as_ref().to_string();
-        new.truncate(new_len);
-        new.into()
+
+    pub fn push_str(mut self, s: &str, ctx: &mut Context) {
+        self.0.push_str(&mut ctx.mutator, s)
+    }
+
+    pub fn from_str(s: &str, ctx: &mut Context) -> String {
+        let mut new = sharable::ConcreteString::with_capacity(&mut ctx.mutator, s.len());
+        new.push_str(&mut ctx.mutator, s);
+        new.alloc(ctx)
+    }
+
+    pub fn remove(&mut self, idx: usize, _: &mut Context) -> char {
+        self.0.remove(idx)
+    }
+
+    pub fn insert(&mut self, idx: usize, ch: char, ctx: &mut Context) {
+        self.0.insert(&mut ctx.mutator, idx, ch)
+    }
+
+    pub fn is_empty(&mut self, _: &mut Context) -> bool {
+        self.0.is_empty()
+    }
+
+    pub fn split_off(&mut self, at: usize, ctx: &mut Context) -> String {
+        self.0.split_off(&mut ctx.mutator, at).alloc(ctx)
+    }
+
+    pub fn clear(&mut self, _: &mut Context) {
+        self.0.clear()
+    }
+
+    pub fn len(&self, _: &mut Context) -> usize {
+        self.0.len()
     }
 }
