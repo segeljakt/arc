@@ -5,6 +5,7 @@
 // #![feature(async_stream)]
 // #![feature(stream_from_iter)]
 #![feature(try_trait_v2)]
+#![feature(type_alias_impl_trait)]
 #![feature(once_cell)]
 #![allow(unused)]
 #![allow(clippy::type_complexity)]
@@ -30,6 +31,7 @@ pub mod prelude {
     pub use crate::data::alloc::Alloc;
     pub use crate::data::conversions::IntoSendable;
     pub use crate::data::conversions::IntoSharable;
+    pub use crate::data::functions::empty_env;
     pub use crate::data::primitives::bool;
     pub use crate::data::primitives::char;
     pub use crate::data::primitives::f32;
@@ -46,6 +48,7 @@ pub mod prelude {
     pub use crate::data::primitives::u8;
     pub use crate::data::primitives::unit;
     pub use crate::data::strings::String;
+    pub use crate::data::vectors::Vec;
     pub use crate::data::Data;
     pub use crate::data::Key;
     pub use crate::executor::Executor;
@@ -53,9 +56,15 @@ pub mod prelude {
 
     // Macros
     pub use crate::access;
+    pub use crate::call;
+    pub use crate::convert_reflexive;
+    pub use crate::declare_functions;
+    pub use crate::direct_call;
     pub use crate::enwrap;
     pub use crate::fun_type;
     pub use crate::fun_val;
+    pub use crate::function;
+    pub use crate::function_type;
     pub use crate::is;
     pub use crate::letroot;
     pub use crate::new;
@@ -67,6 +76,7 @@ pub mod prelude {
     pub use crate::transition;
     pub use crate::unwrap;
     pub use crate::val;
+    pub use crate::vector;
     pub use crate::wait;
     pub use macros::rewrite;
 
@@ -125,9 +135,13 @@ pub mod prelude {
     pub use hexf::hexf32;
     pub use hexf::hexf64;
 
+    pub use erasable::ErasablePtr;
+    pub use erasable::ErasedPtr;
+
     pub use std::any::Any;
     pub use std::any::TypeId;
     pub use std::cell::UnsafeCell;
+    pub use std::fmt::Debug;
     pub use std::future::Future;
     pub use std::pin::Pin;
     pub use std::sync::Arc;

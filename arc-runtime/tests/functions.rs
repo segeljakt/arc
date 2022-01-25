@@ -34,6 +34,7 @@ fn bar() {
 
 fn _bar() {
     let ctx = &mut Context::new();
+    let v = vector!(1,2,3, ctx);
     let stack: &ShadowStack = &ctx.mutator.shadow_stack();
     let value = String::from_str("Hello, world!", ctx);
     #[allow(unused_unsafe)]

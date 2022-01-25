@@ -61,10 +61,11 @@ impl VisitMut for Visitor {
 
     // Certain macros must pass an implicit context parameter
     fn visit_expr_macro_mut(&mut self, i: &mut syn::ExprMacro) {
-        match i {
-            _ if i.mac.path.is_ident("enwrap") => i.mac.tokens.extend([quote!(,), quote!(ctx)]),
-            _ if i.mac.path.is_ident("new") => i.mac.tokens.extend([quote!(,), quote!(ctx)]),
-            _ => {}
+        if ["enwrap", "new", "vector"]
+            .iter()
+            .any(|x| i.mac.path.is_ident(x))
+        {
+            i.mac.tokens.extend([quote!(,), quote!(ctx)]);
         }
         syn::visit_mut::visit_expr_macro_mut(self, i);
     }

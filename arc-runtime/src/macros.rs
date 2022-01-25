@@ -245,7 +245,7 @@ macro_rules! wait {
 
 #[macro_export]
 macro_rules! letroot {
-    ($var_name: ident: $t: ty  = $stack: expr, $value: expr) => {
+    ($var_name:ident : $t:ty  = $stack:expr, $value:expr) => {
         let stack: &ShadowStack = &$stack;
         let value = $value;
         #[allow(unused_unsafe)]
@@ -253,22 +253,17 @@ macro_rules! letroot {
             ShadowStackInternal::<$t>::construct(
                 stack,
                 stack.head.get(),
-                core::mem::transmute::<_, TraitObject>(
-                    &value as &dyn Rootable,
-                )
-                .vtable as usize,
+                core::mem::transmute::<_, TraitObject>(&value as &dyn Rootable).vtable as usize,
                 value,
             )
         };
         #[allow(unused_unsafe)]
-        stack
-            .head
-            .set(unsafe { core::mem::transmute(&mut $var_name) });
+        stack.head.set(unsafe { core::mem::transmute(&mut $var_name) });
         #[allow(unused_mut)]
         let mut $var_name = unsafe { Rooted::construct(&mut $var_name.value) };
     };
 
-    ($var_name : ident = $stack: expr,$value: expr) => {
+    ($var_name:ident = $stack:expr, $value:expr) => {
         let stack: &ShadowStack = &$stack;
         let value = $value;
         #[allow(unused_unsafe)]
@@ -276,20 +271,28 @@ macro_rules! letroot {
             ShadowStackInternal::<_>::construct(
                 stack,
                 stack.head.get(),
-                core::mem::transmute::<_, TraitObject>(
-                    &value as &dyn Rootable,
-                )
-                .vtable as usize,
+                core::mem::transmute::<_, TraitObject>(&value as &dyn Rootable).vtable as usize,
                 value,
             )
         };
         #[allow(unused_unsafe)]
-        stack
-            .head
-            .set(unsafe { core::mem::transmute(&mut $var_name) });
+        stack.head.set(unsafe { core::mem::transmute(&mut $var_name) });
         #[allow(unused_mut)]
         #[allow(unused_unsafe)]
-        let mut $var_name =
-            unsafe { Rooted::construct(&mut $var_name.value) };
+        let mut $var_name = unsafe { Rooted::construct(&mut $var_name.value) };
     };
+}
+// comet::gc_vector!()
+#[macro_export]
+macro_rules! vector {
+    ([$($x:expr),+] , $ctx:expr) => {{
+        let stack = $ctx.mutator.shadow_stack();
+        $crate::letroot!(vec = stack, Some(Vec::new(&mut $ctx)));
+
+        $(
+            vec.as_mut().unwrap().0.push(&mut $ctx.mutator, $x);
+            vec.as_mut().unwrap().0.write_barrier(&mut $ctx.mutator);
+        )*
+        vec.take().unwrap()
+    }}
 }

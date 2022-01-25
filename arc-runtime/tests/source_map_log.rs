@@ -5,17 +5,10 @@ macro_rules! compile_test {
     {$($mod:tt)::+} => {
         use arc_runtime::prelude::*;
 
-        // Note: This may only be used by the main thread.
-        static EXECUTOR: Executor = Executor::new();
-
         #[derive(ComponentDefinition)]
-        struct Source<I: Data, T: Data>
-        where
-            I: IntoIterator<Item = T>,
-            <I as IntoIterator>::IntoIter: Data,
-        {
+        struct Source<T: Data> {
             ctx: ComponentContext<Self>,
-            iter: I,
+            vec: Vec<T>,
             pushable: $($mod)::+::Pushable<T>,
         }
 
@@ -33,23 +26,21 @@ macro_rules! compile_test {
             pullable: $($mod)::+::Pullable<T>,
         }
 
-        impl<I: Data, T: Data> Source<I, T>
-        where
-            I: IntoIterator<Item = T>,
-            <I as IntoIterator>::IntoIter: Data,
-        {
-            fn new(iter: I, pushable: $($mod)::+::Pushable<T>) -> Self {
+        impl<T: Data> Source<T> {
+            fn new(vec: Vec<T>, pushable: $($mod)::+::Pushable<T>) -> Self {
                 Self {
                     ctx: ComponentContext::uninitialised(),
-                    iter,
+                    vec,
                     pushable,
                 }
             }
 
-            async fn run(mut self: ComponentDefinitionAccess<Self>) -> Control<()> {
-                let i = self.iter.clone();
-                for x in i {
-                    self.pushable.push(x).await?;
+            async fn run(mut self: ComponentDefinitionAccess<Self>, ctx: &mut Context) -> Control<()> {
+                let i = self.vec.clone();
+                for x in 0..i.clone().len(ctx) {
+                    let j = i.clone();
+                    let v = j.at(x, ctx);
+                    self.pushable.push(v.clone()).await?;
                 }
                 Control::Finished
             }
@@ -90,13 +81,10 @@ macro_rules! compile_test {
             }
         }
 
-        impl<I: Data, T: Data> ComponentLifecycle for Source<I, T>
-        where
-            I: IntoIterator<Item = T>,
-            <I as IntoIterator>::IntoIter: Data,
-        {
+        impl<T: Data> ComponentLifecycle for Source<T> {
             fn on_start(&mut self) -> Handled {
                 self.spawn_local(move |async_self| async move {
+                    let ctx = Context::new();
                     async_self.run().await;
                     Handled::DieNow
                 });
@@ -124,11 +112,7 @@ macro_rules! compile_test {
             }
         }
 
-        impl<I: Data, T: Data> Actor for Source<I, T>
-        where
-            I: IntoIterator<Item = T>,
-            <I as IntoIterator>::IntoIter: Data,
-        {
+        impl<T: Data> Actor for Source<T> {
             type Message = TaskMessage;
 
             fn receive_local(&mut self, _msg: Self::Message) -> Handled {
@@ -164,35 +148,34 @@ macro_rules! compile_test {
             }
         }
 
-        fn source<I: Data, T: Data>(i: I) -> $($mod)::+::Pullable<T>
-        where
-            I: IntoIterator<Item = T>,
-            <I as IntoIterator>::IntoIter: Data,
-        {
-            let (o0, o1) = $($mod)::+::channel(&EXECUTOR);
-            EXECUTOR.create_task(move || Source::new(i, o0));
+        fn source<T: Data>(vec: Vec<T>, ctx: &mut Context) -> $($mod)::+::Pullable<T> {
+            let (o0, o1) = $($mod)::+::channel(&ctx.system);
+            let c = ctx.system.create(move || Source::new(vec, o0));
+            ctx.system.start(&c);
             o1
         }
 
-        fn map<A: Data, B: Data>(a: $($mod)::+::Pullable<A>, f: fn(A) -> B) -> $($mod)::+::Pullable<B> {
-            let (b0, b1) = $($mod)::+::channel(&EXECUTOR);
-            EXECUTOR.create_task(move || Map::new(a, f, b0));
+        fn map<A: Data, B: Data>(a: $($mod)::+::Pullable<A>, f: fn(A) -> B, ctx: &mut Context) -> $($mod)::+::Pullable<B> {
+            let (b0, b1) = $($mod)::+::channel(&ctx.system);
+            let c = ctx.system.create(move || Map::new(a, f, b0));
+            ctx.system.start(&c);
             b1
         }
 
-        fn log<T: Data>(a: $($mod)::+::Pullable<T>) {
-            EXECUTOR.create_task(move || Log::new(a));
+        fn log<T: Data>(a: $($mod)::+::Pullable<T>, ctx: &mut Context) {
+            let c = ctx.system.create(move || Log::new(a));
+            ctx.system.start(&c);
         }
 
         fn plus_one(x: i32) -> i32 {
             x + 1
         }
 
+//         #[rewrite(main)]
         #[test]
         fn main() {
-            EXECUTOR.init(KompactConfig::default().build().unwrap());
-            log(map(source(0..100), plus_one));
-            EXECUTOR.await_termination();
+            let ctx = &mut Context::new();
+            log(map(source(vector!([1, 2, 3], ctx), ctx), plus_one, ctx), ctx);
         }
     }
 }
@@ -204,11 +187,11 @@ macro_rules! compile_test {
 // mod source_map_log_remote_broadcast {
 //     compile_test!(arc_runtime::channels::remote::broadcast);
 // }
-//
+
 mod source_map_log_local_concurrent {
-    compile_test!(arc_runtime::channels::local::concurrent);
+    compile_test!(arc_runtime::channels::local::task_parallel);
 }
-//
+
 // mod source_map_log_local_broadcast {
 //     compile_test!(arc_runtime::channels::local::broadcast);
 // }

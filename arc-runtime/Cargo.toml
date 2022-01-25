@@ -31,3 +31,8 @@ derive_more                   = { version = "0.99.17", default-features = false,
 futures                       = { version = "0.3.19" }
 replace_with                  = { version = "0.1.7" }
 hexf                          = { version = "0.2.1" }
+erasable                      = { version = "1.2.1" }
+
+[dev-dependencies]
+arrow                         = { version = "7.0.0" }
+arrow2                        = { version = "0.9.1" }

@@ -14,6 +14,7 @@ pub trait IntoSharable {
     fn into_sharable(self, ctx: &mut Context) -> Self::T;
 }
 
+#[macro_export]
 macro_rules! convert_reflexive {
     { $ty:ty } => {
         impl IntoSendable for $ty {

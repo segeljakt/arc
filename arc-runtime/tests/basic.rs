@@ -56,7 +56,7 @@ fn do_thing(a: Pullable<i32>, b: Pullable<i32>) -> Pullable<i32> {
 
 impl ComponentLifecycle for DoThing {
     fn on_start(&mut self) -> Handled {
-        self.spawn_local(move |async_self| async move {
+        self.spawn_local(move |mut async_self| async move {
             async_self.run().await;
             Handled::DieNow
         });

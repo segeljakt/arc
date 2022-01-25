@@ -3,6 +3,7 @@ pub mod conversions;
 pub mod primitives;
 pub mod strings;
 pub mod vectors;
+pub mod functions;
 
 use crate::data::conversions::IntoSendable;
 use crate::data::conversions::IntoSharable;
