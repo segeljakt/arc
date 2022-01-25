@@ -85,7 +85,7 @@ public:
     o << "pub mod " << ModuleName
       << "{\n"
          "use super::*;\n"
-      << "pub use arc_codegen::*;\n"
+      << "pub use arc_runtime::prelude::*;\n"
       << "pub use hexf::*;\n";
 
     for (auto i : CrateDirectives)

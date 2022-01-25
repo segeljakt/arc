@@ -98,4 +98,4 @@ function llvm-build {
 }
 
 llvm-cmake
-llvm-build
+#llvm-build

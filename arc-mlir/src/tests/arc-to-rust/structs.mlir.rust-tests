@@ -2,6 +2,7 @@
 #[cfg(test)]
 mod tests {
   use crate::arctoruststructs::*;
+  #[rewrite(main)]
   #[test]
   fn it_works() {
     assert_eq!(ok3().a, 4);

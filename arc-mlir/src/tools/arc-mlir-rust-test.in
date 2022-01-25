@@ -50,7 +50,7 @@ description = "Generic MLIR-to-Rust test case"
 insta               = { version = "1.6.0", features = ["glob"] }
 regex               = { version = "1.4.3" }
 lazy_static         = { version = "1.4.0" }
-arc-codegen         = { version = "=0.0.0", path = "${ARC_CODEGEN_SOURCE_DIR}" }
+#arc-codegen         = { version = "=0.0.0", path = "${ARC_CODEGEN_SOURCE_DIR}" }
 arc-runtime         = { version = "=0.0.0", path = "${ARC_RUNTIME_SOURCE_DIR}" }
 hexf                = { version = "0.2.1" }
 ndarray             = { version = "0.13.0" }

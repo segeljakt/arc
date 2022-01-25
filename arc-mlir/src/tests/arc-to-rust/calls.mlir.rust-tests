@@ -10,12 +10,12 @@ pub fn an_external_fun1() -> Box<dyn ValueFn(i32,) -> i32> {
   return Box::new(an_external_fun3);
 }
 
-pub fn an_external_fun2(i : Stream<<Struct3keyi325valuei32End as Convert>::T>)
-    -> Stream<<Struct3keyi325valuei32End as Convert>::T>{
+pub fn an_external_fun2(i : Pullable<Struct3keyi325valuei32End>)
+    -> Pullable<Struct3keyi325valuei32End> {
   return i;
 }
-
-pub fn crate_Identity() -> Box<dyn ValueFn(Stream<<Struct3keyi325valuei32End as Convert>::T>) -> Stream<<Struct3keyi325valuei32End as Convert>::T>> {
+#[rewrite]
+pub fn crate_Identity() -> Box<dyn ValueFn(Pullable<Struct3keyi325valuei32End>) -> Pullable<Struct3keyi325valuei32End> {
   return Box::new(an_external_fun2);
 }
 
