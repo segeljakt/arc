@@ -298,9 +298,10 @@ module Ctx = struct
         (* L-value must be a cell. TODO: Support more L-values *)
         begin match ctx |> find_vname x with
         | Some (v, MVar) -> (v, ctx)
-        | _ -> panic ("Expected variable")
+        | Some (_, MVal) -> panic "L-value is a value"
+        | None -> panic "Variable not bound"
         end
-    | _ -> panic ("Expected variable")
+    | _ -> panic "Expected variable, found path"
 
   (* Returns set of currently visible variables *)
   and visible ctx =
@@ -1017,7 +1018,7 @@ and lower_stmt s (ctx:Ctx.t) =
       let (v, ctx) = lower_expr e ctx in
       let (t, ctx) = lower_type_or_fresh t ctx in
       let (v, ctx) = ctx |> Ctx.new_cell v t in
-      ctx |> Ctx.rename_vname x (v, MVal)
+      ctx |> Ctx.rename_vname x (v, MVar)
   | Ast.SExpr e -> 
       let (_, ctx) = lower_expr e ctx in
       ctx
