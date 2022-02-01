@@ -42,7 +42,7 @@ envsubst > ${WORK_DIR}/Cargo.toml <<'EOF'
 name        = "${TEST_NAME}"
 version     = "0.0.0"
 authors     = ["The arc-mlir testing gnome"]
-edition     = "2018"
+edition     = "2021"
 license     = "MIT"
 description = "Generic MLIR-to-Rust test case"
 
