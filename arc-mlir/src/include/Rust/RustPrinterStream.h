@@ -84,7 +84,7 @@ public:
     o << "pub mod " << ModuleName
       << "{\n"
          "use super::*;\n"
-      << "pub use arc_script::codegen::*;\n"
+      << "pub use arc_runtime::prelude::*;\n"
       << "pub use arc_script::codegen;\n"
       << "pub use hexf::*;\n";
 
