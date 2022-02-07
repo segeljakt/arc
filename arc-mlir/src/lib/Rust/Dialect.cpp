@@ -347,10 +347,10 @@ void RustCallOp::writeRust(RustPrinterStream &PS) {
   if (target && target->hasAttr("arc.rust_name"))
     callee = target->getAttrOfType<StringAttr>("arc.rust_name").getValue();
 
-  PS << callee << "(";
+  PS << "call!(" << callee << "(";
   for (auto a : getOperands())
     PS << a << ", ";
-  PS << ")";
+  PS << "))";
   PS << ";\n";
 }
 
@@ -361,17 +361,18 @@ void RustCallIndirectOp::writeRust(RustPrinterStream &PS) {
     PS << "let ";
     PS.printAsArg(r) << ":" << r.getType() << " = ";
   }
-  PS << "(" << getCallee() << ")(";
+  PS << "call_indirect!((" << getCallee() << ")(";
   for (auto a : getArgOperands())
     PS << a << ", ";
-  PS << ")";
+  PS << "))";
   PS << ";\n";
 }
 
 // Write this function as Rust code to os
 void RustFuncOp::writeRust(RustPrinterStream &PS) {
-  bool isNonpersistentTask = (*this)->hasAttr("arc.is_toplevel_task_function") &&
-                (*this)->hasAttr("arc.use_nonpersistent");
+  bool isNonpersistentTask =
+      (*this)->hasAttr("arc.is_toplevel_task_function") &&
+      (*this)->hasAttr("arc.use_nonpersistent");
   bool isMethod = (*this)->hasAttr("arc.task_name") &&
                   (*this)->hasAttr("arc.mod_name") &&
                   !(*this)->hasAttr("arc.is_event_handler");

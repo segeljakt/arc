@@ -13,25 +13,14 @@ pub fn an_external_fun1() -> function!((i32) -> i32) {
   return an_external_fun3;
 }
 
-#[rewrite]
-pub fn an_external_fun2(i : Pullable<Struct3keyi325valuei32End>) -> Pullable<Struct3keyi325valuei32End> {
-    -> Pullable<Struct3keyi325valuei32End> {
-  return i;
-}
-
-#[rewrite]
-pub fn crate_Identity() -> function!((Pullable<Struct3keyi325valuei32End>) -> Pullable<Struct3keyi325valuei32End>) {
-  return an_external_fun2;
-}
-
 pub fn the_name_on_the_rust_side(i: i32) -> i32 {
   return i;
 }
 
-#[rewrite(main)]
 #[cfg(test)]
 mod tests {
   use crate::toplevel::*;
+  #[rewrite(main)]
   #[test]
   fn test() {
   assert_eq!(call!(callee_si32_si32(17)), 17);
