@@ -1,0 +1,12 @@
+#[cfg(test)]
+mod tests {
+  use crate::toplevel::*;
+
+  #[rewrite(main)]
+  #[test]
+  fn test() {
+    // Do something which calls the external function
+    caller0(0);
+    caller1(1);
+  }
+}
