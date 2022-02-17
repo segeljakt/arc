@@ -36,7 +36,10 @@ pub(crate) fn rewrite(_attr: syn::AttributeArgs, mut item: syn::ItemFn) -> pm::T
     );
     item.sig.ident = id;
     item.sig.inputs.push(syn::parse_quote!(ctx: Context));
-    quote::quote!(#wrapper_item #item).into()
+    quote::quote!(
+        use arc_runtime::prelude::*;
+        #wrapper_item #item
+    ).into()
 }
 
 pub(crate) struct Visitor {
