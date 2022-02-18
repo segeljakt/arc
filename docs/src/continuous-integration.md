@@ -16,7 +16,7 @@ su -l arc-runner
 
 sudo add-apt-repository ppa:git-core/ppa -y
 sudo apt update && apt upgrade -y
-sudo apt install -y git vim curl z3 libz3-dev curl libssl-dev gcc pkg-config make ninja-build python zip openjdk-8-jdk software-properties-common texlive-xetex
+sudo apt install -y git vim curl z3 libz3-dev curl libssl-dev gcc pkg-config make ninja-build python zip openjdk-8-jdk software-properties-common texlive-xetex latexmk
 
 # Install Rust
 
