@@ -13,16 +13,16 @@ configure_lit_site_cfg(
 
 set(ARC_MLIR_TEST_DEPENDS
   FileCheck count not
-  arc-mlir arc-lang
+  arc-mlir dune-build
 )
 
 add_lit_testsuite(check-arc-mlir "Running the ARC-MLIR regression tests"
   ${CMAKE_CURRENT_BINARY_DIR}
-  DEPENDS ${MLIR_TEST_DEPENDS}
+  DEPENDS ${MLIR_TEST_DEPENDS} ${ARC_MLIR_TEST_DEPENDS}
 )
 
 set_target_properties(check-arc-mlir PROPERTIES FOLDER "Tests")
 
 add_lit_testsuites(ARC_MLIR ${CMAKE_CURRENT_SOURCE_DIR}
-  DEPENDS ${ARC_MLIR_TEST_DEPS}
+  DEPENDS ${ARC_MLIR_TEST_DEPENDS}
 )

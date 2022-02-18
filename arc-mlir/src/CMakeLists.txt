@@ -23,11 +23,23 @@ get_filename_component(ARC_TOOLS_BIN_DIR "../../bin"
 get_filename_component(ARC_LANG_SRC_DIR "../../arc-lang"
   REALPATH BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE)
 
+get_filename_component(ARC_LANG_BUILD_DIR "../../arc-lang/build"
+  REALPATH BASE_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE)
+
 get_filename_component(ARC_RUNTIME_SRC_DIR "../../arc-runtime"
   REALPATH BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE)
 
 get_filename_component(ARC_MLIR_SRC_DIR "../"
   REALPATH BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE)
+
+add_custom_target(dune-build ALL
+  WORKING_DIRECTORY ${ARC_LANG_SRC_DIR}
+  COMMAND mkdir -p ${ARC_LANG_BUILD_DIR}
+  COMMAND ${ARC_LANG_SRC_DIR}/dune-wrapper build
+    --root ${ARC_LANG_SRC_DIR}
+    --build-dir ${ARC_LANG_BUILD_DIR} src/main.exe
+  COMMAND mv -f ${ARC_LANG_BUILD_DIR}/default/src/main.exe ${ARC_LANG_EXE}
+)
 
 add_subdirectory(include)
 add_subdirectory(lib)

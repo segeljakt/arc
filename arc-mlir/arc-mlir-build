@@ -53,15 +53,6 @@ function fail {
     exit 1
 }
 
-function dune-build {
-    mkdir -p $LLVM_BUILD_DIR/bin || fail "creating $LLVM_BUILD_DIR/bin"
-    dune build \
-      --root $ARC_LANG_SRC_DIR \
-      --build-dir $ARC_LANG_BUILD_DIR \
-      src/main.exe
-    mv $ARC_LANG_BUILD_DIR/default/src/main.exe $LLVM_BUILD_DIR/bin/arc-lang
-}
-
 function llvm-cmake {
 
     mkdir -p $LLVM_BUILD_DIR || fail "creating $LLVM_BUILD_DIR"
@@ -92,7 +83,6 @@ function llvm-cmake {
 }
 
 function llvm-build {
-    dune-build || fail "building dune"
     cmake --build $LLVM_BUILD_DIR || fail "building LLVM"
 }
 
