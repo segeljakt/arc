@@ -1,0 +1,108 @@
+\documentclass{report}
+
+% Document
+\usepackage{subfiles}
+
+% Text
+\usepackage{inputenc}
+\usepackage[english]{babel}
+
+% Figures
+\usepackage{graphicx}
+\usepackage{caption} 
+\usepackage{framed}
+
+% Tables
+\usepackage{csvsimple}
+\usepackage{longtable}
+%\captionsetup[table]{skip=10pt}
+\usepackage{booktabs}
+%\usepackage{xtab}
+\usepackage{supertabular}
+\usepackage{multirow}
+
+% Notes
+\usepackage{todonotes}
+
+% References
+\usepackage{cite}
+\usepackage[resetlabels,labeled]{multibib}
+\usepackage{marginnote}
+
+% Spacing
+\usepackage{mparhack}
+\usepackage{marginfix}
+\usepackage{titlesec}
+\titlespacing*{\section}{0pt}{1.1\baselineskip}{\baselineskip}
+\titlespacing*{\subsection}{0pt}{1.1\baselineskip}{\baselineskip}
+\titlespacing*{\subsubsection}{0pt}{1.1\baselineskip}{\baselineskip}
+
+% Lists
+\usepackage{enumitem}
+
+% Fonts
+\usepackage[T1]{fontenc}
+
+% Code
+\usepackage{listings}
+\usepackage{courier}
+\lstset{basicstyle=\footnotesize\ttfamily,breaklines=true}
+
+\parskip 0pt
+\setlist[itemize]{noitemsep, topsep=10pt}
+
+% Comments
+\newcounter{KlasNOC}
+\newcounter{FrejNOC}
+\newcounter{ParisNOC}
+
+\stepcounter{KlasNOC}
+\stepcounter{FrejNOC}
+\stepcounter{ParisNOC}
+
+\newcommand{\klas}[1]{\textcolor{aquamarine}{\small \bf [Klas\#\arabic{KlasNOC}\stepcounter{KlasNOC}: #1]}}
+\newcommand{\frej}[1]{\textcolor{salmon}{\small \bf [Frej\#\arabic{FrejNOC}\stepcounter{FrejNOC}: #1]}}
+\newcommand{\paris}[1]{\textcolor{dandelion}{\small \bf [Paris\#\arabic{ParisNOC}\stepcounter{ParisNOC}: #1]}}
+
+% Title
+\title{Arc-Lang: Research Report}
+
+% Authors
+\author{
+  Klas Segeljakt\\
+  \texttt{klasseg@kth.se}
+  \and
+  Frej Drejhammar\\
+  \texttt{frej.drejhammar@ri.se}
+  \and
+  Paris Carbone\\
+  \texttt{parisc@kth.se}
+  \and
+  Seif Haridi\\
+  \texttt{haridi@kth.se}
+}
+
+% Body
+\begin{document}
+
+\maketitle
+
+\subfile{sections/abstract}
+
+%\tableofcontents
+
+\subfile{sections/introduction}
+
+\subfile{sections/tour-of-arc-lang}
+
+\subfile{sections/high-level-model}
+
+\subfile{sections/execution-model}
+
+\subfile{sections/related-work}
+
+\subfile{sections/conclusion}
+
+\bibliography{bibliography/references}
+
+\end{document}
