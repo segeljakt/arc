@@ -9,29 +9,30 @@ jobs:
   build-deploy:
     runs-on: ubuntu-18.04
     steps:
-      - uses: actions/checkout@v2
+    - name: Checkout source
+      uses: actions/checkout@v2
 
-      - name: Setup mdbook
-        uses: peaceiris/actions-mdbook@v1
-        with:
-          mdbook-version: 'latest'
+    - name: Setup mdbook
+      uses: peaceiris/actions-mdbook@v1
+      with:
+        mdbook-version: 'latest'
 
-      - name: Install mdbook-linkcheck
-        run: cargo install mdbook-linkcheck
+    - name: Install mdbook-linkcheck
+      run: cargo install mdbook-linkcheck
 
-      - name: Build custom mdbook preprocessors
-        run: |
-          cargo build -C arc-website/grammar/Cargo.toml
-          cargo build -C arc-website/syntax/Cargo.toml
+    - name: Build custom mdbook preprocessors
+      run: |
+        cargo build -C arc-website/grammar/Cargo.toml
+        cargo build -C arc-website/syntax/Cargo.toml
 
-      - name: Build documentation
-        run: mdbook build arc-website/ --dest-dir arc-website/docs
+    - name: Build documentation
+      run: mdbook build arc-website/ --dest-dir arc-website/docs
 
-      - name: Deploy to gh-pages
-        if: success()
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          deploy_key: ${{ secrets.GITHUB_PAGES }}
-          publish_dir: arc-website/docs
-          force_orphan: true
+    - name: Deploy to gh-pages
+      if: success()
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        deploy_key: ${{ secrets.GITHUB_PAGES }}
+        publish_dir: arc-website/docs
+        force_orphan: true
 
