@@ -1,0 +1,31 @@
+name: LaTeX
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  compile-report:
+    runs-on: ubuntu-18.04
+
+    env:
+      CARGO_TERM_COLOR: always
+      CCACHE_CONFIGPATH: /home/arc-runner/actions-runner/persist/ccache-config
+      PERSIST_DIR: /home/arc-runner/actions-runner/persist/
+
+    steps:
+    - name: Checkout source
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install texlive-xetex latexmk texlive-bibtex-extra biber
+
+    - name: Compile arc-report
+      run: |
+        cd arc-report
+        latexmk main.tex
+
+    - name: Check for dirty tree
+      run: ./check-for-dirty-tree

@@ -40,7 +40,7 @@ if [[ -d "${SCCACHE_DIR}" ]]; then
     echo "It contains $(du -hs ${SCCACHE_DIR} | cut -f1)"
 else
     echo "Creating Sccache directory at ${SCCACHE_DIR}"
-    mkdir -p ${SCCACHE_DIR}
+    sudo mkdir -p ${SCCACHE_DIR}
 fi
 
 function check-ccache {
